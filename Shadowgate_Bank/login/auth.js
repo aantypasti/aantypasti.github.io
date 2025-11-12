@@ -10,6 +10,7 @@ const next = params.get('next') || '../app/dashboard/index.html';
 location.href = next;
 
 
+
 let isRegister = false;
 
 toggle.addEventListener("click", (e) => {

@@ -311,14 +311,14 @@
 }
 
 document.getElementById('applyBtn').addEventListener('click', () => {
-  if (isLoggedIn()) {
+  if (localStorage.getItem('authToken')) {
     location.href = '../../app/loans/index.html';
   } else {
-    // pass a return URL for after login
     const next = encodeURIComponent('../../app/loans/index.html');
     location.href = `../../login/?next=${next}`;
   }
 });
+
 
 
 
