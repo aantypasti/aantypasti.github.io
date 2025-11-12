@@ -198,7 +198,6 @@ if (session) {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify(body),
-			credentials: 'include' // allows cookie-based auth if backend sets HttpOnly cookies
 		});
 			let data = null;
 			try {data = await res.json();} catch { /* ignore non-JSON */}
