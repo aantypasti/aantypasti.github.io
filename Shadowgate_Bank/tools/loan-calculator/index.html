@@ -7,51 +7,49 @@
 
   <style>
     :root{
-      --bg:#1e1e1e; --panel:#2a2a2a; --border:#333;
-      --text:#e6e6e6; --muted:#b9c0c7; --brand:#36b0ff; --radius:14px; --maxw:1100px;
+      --bg:#101214; --panel:#17191c; --border:#22262b;
+      --text:#e8eaed; --muted:#b3bac4; --brand:#36b0ff; --radius:14px; --maxw:1100px;
     }
     *{box-sizing:border-box}
-    body{margin:0; background:var(--bg); color:var(--text); font-family: 'Poppins', system-ui, Arial, sans-serif}
-    a{color:var(--brand); text-decoration:none} a:hover{text-decoration:underline}
+    body{margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
     .wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px}
 
-    /* Header (reuse pattern) */
     header{background:var(--panel); border-bottom:1px solid var(--border)}
     .header-bar{display:flex; align-items:center; justify-content:center; position:relative; min-height:92px}
     .logo-left{position:absolute; left:16px; display:flex; align-items:center}
     .logo-left img{height:74px; width:auto; object-fit:contain}
     .site-title{font-size:26px; font-weight:800; margin:0}
     .header-actions{position:absolute; right:16px; display:flex; gap:10px}
-    .btn{display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border:1px solid var(--border); background:#222; color:var(--text); border-radius:10px; font-weight:600}
+    .btn{display:inline-flex; align-items:center; justify-content:center; padding:10px 16px; border:1px solid var(--border); background:#14171a; color:var(--text); border-radius:10px; font-weight:600; cursor:pointer}
     .btn.primary{border-color:var(--brand)}
-    .btn:hover{background:#242424}
+    .btn:hover{background:#191d21}
 
     main{padding:24px 0}
-    h2{margin:8px 0 6px; font-size:24px; text-align:center}
-    p.muted{color:var(--muted); text-align:center; margin:0 0 20px}
-
+    h2{margin:8px 0 6px; font-size:22px}
     .panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
     .grid{display:grid; grid-template-columns: 1.1fr 0.9fr; gap:16px}
     @media (max-width:900px){ .grid{grid-template-columns:1fr} }
 
     .toggle{display:flex; gap:8px; flex-wrap:wrap}
     .toggle .chip{
-      padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:#222; cursor:pointer; user-select:none
+      padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:#14171a; cursor:pointer; user-select:none
     }
     .toggle .chip.active{border-color:var(--brand); outline:1px solid var(--brand)}
     .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    label{display:block; font-size:14px; color:#cfd3d8; margin:6px 0 4px}
-    input, select{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:#1a1a1a; color:var(--text)}
-    .note{font-size:13px; color:#aeb4bb}
-
+    label{display:block; font-size:14px; color:#d7dce1; margin:6px 0 4px}
+    input, select{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:#0f1215; color:var(--text)}
     table{width:100%; border-collapse:collapse; margin-top:12px}
-    th, td{padding:10px; border-bottom:1px solid var(--border); text-align:right}
+    th, td{padding:10px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap}
     th:first-child, td:first-child{text-align:left}
-    tfoot td{font-weight:700}
-    .apply{display:flex; justify-content:flex-end; margin-top:16px}
+
+    .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px}
+    .kpi{background:#111418; border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center}
+    .kpi .label{color:#c0c6cf; font-size:12px}
+    .kpi .value{font-weight:700; font-size:18px}
+    .apply-wrap{display:flex; justify-content:flex-end; margin-top:12px}
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Header -->
@@ -72,10 +70,8 @@
   </header>
 
   <main class="wrap">
-    <p class="muted">Public tool</p>
-
-    <section class="panel grid">
-      <!-- Left column: inputs -->
+    <section class="panel grid" id="calculator">
+      <!-- Left: inputs -->
       <div>
         <div class="toggle" id="loanType">
           <div class="chip active" data-type="interest">Interest</div>
@@ -94,7 +90,7 @@
           </div>
           <div>
             <label for="amount">Amount</label>
-            <input id="amount" type="number" inputmode="decimal" placeholder="e.g., 100000" />
+            <input id="amount" type="number" inputmode="decimal" placeholder="e.g., 1000000" />
           </div>
         </div>
 
@@ -103,35 +99,39 @@
             <label for="rate">% Interest (weekly)</label>
             <input id="rate" type="number" step="0.01" placeholder="e.g., 3.00" />
           </div>
-          <div>
+
+          <!-- Interest: Duration | Stable: Repayment Rate -->
+          <div id="durationWrap">
             <label for="duration">Duration (weeks)</label>
             <input id="duration" type="number" step="1" min="1" placeholder="e.g., 8" />
           </div>
+          <div id="repayWrap" style="display:none">
+            <label for="repayRate">Repayment rate</label>
+            <input id="repayRate" type="number" step="0.001" min="0.001" max="1" placeholder="e.g., 0.090" />
+          </div>
         </div>
 
-        <div class="row">
-          <div>
-            <label for="interval">Interval</label>
-            <select id="interval" disabled>
-              <option>Weekly</option>
-            </select>
-            <div class="note">Interval locked to weekly for now</div>
-          </div>
-          <div id="stableOnly" style="display:none">
-            <!-- Repayment rate (editable) -->
-<div id="repayBlock">
-  <label for="repayRate">Repayment rate </label>
-  <input id="repayRate" type="number" step="0.001" min="0" max="1" placeholder="e.g., 0.125" />
-  <div class="note">Example: 0.125 = 12.5% of principal each period. </div>
+        <div style="margin-top:12px">
+          <button class="btn primary" id="calcBtn" type="button">Calculate schedule</button>
+          <button class="btn" id="resetBtn" type="button">Reset</button>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="label">Total Interest</div><div class="value" id="kpiInterest">—</div></div>
+          <div class="kpi"><div class="label">Total Paid</div><div class="value" id="kpiTotal">—</div></div>
+          <div class="kpi"><div class="label">Last Payment</div><div class="value" id="kpiLast">—</div></div>
+        </div>
+
+        <!-- Apply button moved here -->
+        <div class="apply">
+  <button class="btn primary" id="applyBtn" type="button">Apply</button>
 </div>
 
-          </div>
-        </div>
       </div>
 
-      <!-- Right column: results table placeholder -->
+      <!-- Right: preview -->
       <div>
-        <div class="panel" style="background:#1f1f1f">
+        <div class="panel" style="background:#111418">
           <strong>Schedule (preview)</strong>
           <table>
             <thead>
@@ -143,7 +143,6 @@
               </tr>
             </thead>
             <tbody id="scheduleBody">
-              <!-- rows will go here when we add logic -->
               <tr><td colspan="4" style="text-align:center;color:#8b939b">No calculation yet</td></tr>
             </tbody>
             <tfoot>
@@ -155,35 +154,177 @@
               </tr>
             </tfoot>
           </table>
-          <div class="apply">
-            <a class="btn primary" href="../../login/">Apply</a>
-          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Repayment Rate Calculator: two boxes -->
+    <section class="panel" id="rrCalc" style="margin-top:16px">
+      <h2>Repayment Rate Calculator</h2>
+      <div class="row">
+        <div>
+          <label for="rrWeeks">Duration (weeks)</label>
+          <input id="rrWeeks" type="number" min="1" step="1" placeholder="e.g., 11" />
+        </div>
+        <div>
+          <label>Repayment rate</label>
+          <input id="rrOut" type="text" readonly placeholder="—" />
         </div>
       </div>
     </section>
   </main>
 
   <script>
-    // Minimal interactivity: toggle loan type UI + show 1/N repayment rate for Stable
+    // ---------- Helpers ----------
+    const fmt = (n) => Number.isFinite(n) ? n.toLocaleString(undefined,{maximumFractionDigits:2}) : "—";
+    const n2 = (x) => +x.toFixed(2);
+
+    // ---------- Elements ----------
     const typeChips = document.querySelectorAll('#loanType .chip');
-    const stableOnly = document.getElementById('stableOnly');
+    const durationWrap = document.getElementById('durationWrap');
+    const repayWrap = document.getElementById('repayWrap');
+
+    const amountEl = document.getElementById('amount');
+    const rateEl = document.getElementById('rate');
     const durationEl = document.getElementById('duration');
     const repayRateEl = document.getElementById('repayRate');
 
+    const scheduleBody = document.getElementById('scheduleBody');
+    const tPrincipal = document.getElementById('tPrincipal');
+    const tInterest  = document.getElementById('tInterest');
+    const tTotal     = document.getElementById('tTotal');
+    const kpiInterest = document.getElementById('kpiInterest');
+    const kpiTotal    = document.getElementById('kpiTotal');
+    const kpiLast     = document.getElementById('kpiLast');
+
+    const rrWeeks = document.getElementById('rrWeeks');
+    const rrOut   = document.getElementById('rrOut');
+
+    let loanType = 'interest';
+
+    // ---------- UI: type toggle ----------
     function setType(type){
+      loanType = type;
       typeChips.forEach(c => c.classList.toggle('active', c.dataset.type === type));
-      stableOnly.style.display = (type === 'stable') ? 'block' : 'none';
-      updateRepayRate();
+      if (type === 'stable'){
+        durationWrap.style.display = 'none';
+        repayWrap.style.display = 'block';
+      } else {
+        durationWrap.style.display = 'block';
+        repayWrap.style.display = 'none';
+      }
     }
-    function updateRepayRate(){
-      const N = parseInt(durationEl.value,10);
-      if (!Number.isFinite(N) || N <= 0){ repayRateEl.value = '—'; return; }
-      repayRateEl.value = (1/N).toFixed(3);
+    typeChips.forEach(c => c.addEventListener('click', () => setType(c.dataset.type)));
+
+    // ---------- RR mini calc (weeks -> rate) ----------
+    rrWeeks.addEventListener('input', () => {
+      const w = parseInt(rrWeeks.value,10);
+      rrOut.value = (Number.isFinite(w) && w>0) ? (1/w).toFixed(3) : "";
+    });
+
+    // ---------- Build schedules ----------
+    function buildScheduleInterest(P, rPct, weeks){
+      const r = rPct/100;
+      let bal = P, totP=0, totI=0, last=0;
+      const rows=[];
+      for(let k=1;k<=weeks;k++){
+        const interest = n2(bal*r);
+        const pPay = (k===weeks) ? n2(bal) : 0;
+        const pay = n2(pPay + interest);
+        rows.push({week:k, p:pPay, i:interest, t:pay});
+        bal = n2(bal - pPay);
+        totP += pPay; totI += interest; last = pay;
+      }
+      return {rows, totals:{p:n2(totP), i:n2(totI), t:n2(totP+totI), last}};
     }
 
-    typeChips.forEach(c => c.addEventListener('click', () => setType(c.dataset.type)));
-    durationEl.addEventListener('input', updateRepayRate);
-    // default type = Interest
+    // Stable = constant principal each period, duration implied by repayment rate
+    function buildScheduleStable(P, rPct, repayRate){
+      const r = rPct/100;
+      const pPerRaw = P * repayRate;              // fixed principal each period
+      const pPer = n2(Math.max(0, pPerRaw));
+      let bal = P, k=0, totP=0, totI=0, last=0;
+      const rows=[];
+      // safety cap to prevent accidental infinite loops
+      for(let guard=0; guard<1040 && bal>0.0001; guard++){
+        k++;
+        const interest = n2(bal*r);
+        let pPay = (bal <= pPer) ? n2(bal) : pPer;
+        const pay = n2(pPay + interest);
+        rows.push({week:k, p:pPay, i:interest, t:pay});
+        bal = n2(bal - pPay);
+        totP += pPay; totI += interest; last = pay;
+      }
+      return {rows, totals:{p:n2(totP), i:n2(totI), t:n2(totP+totI), last}};
+    }
+
+    function renderPreview(s){
+      if (!s || s.rows.length === 0){
+        scheduleBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#8b939b">No calculation yet</td></tr>`;
+        tPrincipal.textContent = tInterest.textContent = tTotal.textContent = kpiInterest.textContent = kpiTotal.textContent = kpiLast.textContent = "—";
+        return;
+      }
+      scheduleBody.innerHTML = s.rows.map(r =>
+        `<tr>
+          <td>${r.week}</td>
+          <td>${fmt(r.p)}</td>
+          <td>${fmt(r.i)}</td>
+          <td>${fmt(r.t)}</td>
+        </tr>`).join("");
+
+      tPrincipal.textContent = fmt(s.totals.p);
+      tInterest.textContent  = fmt(s.totals.i);
+      tTotal.textContent     = fmt(s.totals.t);
+
+      kpiInterest.textContent = fmt(s.totals.i);
+      kpiTotal.textContent    = fmt(s.totals.t);
+      kpiLast.textContent     = fmt(s.totals.last);
+    }
+
+    function calculate(){
+      const P = parseFloat(amountEl.value);
+      const rPct = parseFloat(rateEl.value);
+      if (!(P>0) || !(rPct>=0)){ alert("Enter Amount and weekly % Interest."); return; }
+
+      let sched;
+      if (loanType === 'interest'){
+        const weeks = parseInt(durationEl.value,10);
+        if (!(Number.isInteger(weeks) && weeks>0)){ alert("Enter Duration (weeks)."); return; }
+        sched = buildScheduleInterest(P, rPct, weeks);
+      } else {
+        const rr = parseFloat(repayRateEl.value);
+        if (!(rr>0 && rr<=1)){ alert("Enter Repayment rate (0–1)."); return; }
+        sched = buildScheduleStable(P, rPct, rr);
+      }
+      renderPreview(sched);
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      document.querySelectorAll('#calculator input').forEach(i => i.value = '');
+      renderPreview(null);
+    });
+
+    // ---------- Apply button routing ----------
+    function isLoggedIn() {
+  return !!(localStorage.getItem("authToken") || sessionStorage.getItem("authToken"));
+}
+
+document.getElementById('applyBtn').addEventListener('click', () => {
+  if (isLoggedIn()) {
+    location.href = '../../app/loans/index.html';
+  } else {
+    // pass a return URL for after login
+    const next = encodeURIComponent('../../app/loans/index.html');
+    location.href = `../../login/?next=${next}`;
+  }
+});
+
+
+
+
+    // defaults
+    setType('interest');
   </script>
 </body>
 </html>

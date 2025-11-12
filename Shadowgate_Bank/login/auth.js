@@ -4,6 +4,11 @@ const title = document.getElementById("form-title");
 const submitBtn = document.getElementById("submit-btn");
 const registerFields = document.getElementById("register-fields");
 const errorMessage = document.getElementById("error-message");
+// after saving authToken
+const params = new URLSearchParams(location.search);
+const next = params.get('next') || '../app/dashboard/index.html';
+location.href = next;
+
 
 let isRegister = false;
 
