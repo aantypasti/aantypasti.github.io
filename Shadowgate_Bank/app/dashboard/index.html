@@ -182,14 +182,44 @@
   </div>
 
   <script>
-    // -------- Guard: require a session (client-side mock) --------
+    // ---- JWT-based guard to prevent redirect loops ----
     (function() {
-      const sess = localStorage.getItem('sg_session');
-      if (!sess) {
-        window.location.href = "../../login/index.html";
+      const API_BASE = "https://shadowgatebackend-production.up.railway.app/api";
+
+      function safeAtob(str) {
+        try { return atob(str); } catch { return null; }
+      }
+      function parseJwtPayload(tok) {
+        if (!tok || tok.split('.').length < 2) return null;
+        const b64 = tok.split('.')[1];
+        const json = safeAtob(b64);
+        if (!json) return null;
+        try { return JSON.parse(json); } catch { return null; }
+      }
+
+      // 1) Read token. If missing -> go to login
+      const token = localStorage.getItem('sg_token');
+      if (!token) {
+        window.location.replace("../../login/index.html");
         return;
       }
-      const who = JSON.parse(sess || "{}").u || localStorage.getItem('sg_user') || "User";
+
+      // 2) Decode payload (no secret needed) and check exp if present
+      const payload = parseJwtPayload(token);
+      const now = Math.floor(Date.now() / 1000);
+      const isExpired = payload && typeof payload.exp === "number" && payload.exp <= now;
+
+      if (!payload || isExpired) {
+        // Bad/expired token → clear and send to login (breaks the loop)
+        localStorage.removeItem('sg_token');
+        localStorage.removeItem('sg_role');
+        localStorage.removeItem('sg_session'); // legacy
+        window.location.replace("../../login/index.html");
+        return;
+      }
+
+      // 3) Set "who" from token (or fallback)
+      const who = payload.username || payload.sub || localStorage.getItem('sg_user') || "User";
       document.getElementById('user-tag').textContent = who;
 
       // Mock account number from username hash (placeholder)
@@ -203,10 +233,12 @@
         if (val != null) localStorage.setItem('sg_api', val.trim());
       });
 
-      // Logout
+      // Logout: clear both new and legacy keys, then go to login
       document.getElementById('logout').addEventListener('click', () => {
-        localStorage.removeItem('sg_session');
-        window.location.href = "../../login/index.html";
+        localStorage.removeItem('sg_token');
+        localStorage.removeItem('sg_role');
+        localStorage.removeItem('sg_session'); // legacy
+        window.location.replace("../../login/index.html");
       });
 
       // ---- helpers ----

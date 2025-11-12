@@ -50,7 +50,6 @@
   <div class="wrap">
     <div class="container">
       <!-- Header -->
-      <!-- CHANGED: make links/logo relative to /Shadowgate_Bank/ -->
       <div class="header">
         <a class="brand" href="../" title="Back to Home">
           <img class="logo-img" src="../assets/Shadowgate_Logo.png" alt="Shadowgate Bank Logo" />
@@ -118,16 +117,33 @@
   </div>
 
   <script>
-    // If already logged in, redirect by role
-    // CHANGED: relative redirects
+    // --- SAFE AUTO-REDIRECT: only if token decodes and isn't expired ---
     (function () {
-      const session = localStorage.getItem('sg_token');
-      if (session) {
-        const role = (localStorage.getItem('sg_role') || '').toLowerCase();
-        if (role === 'admin') window.location.href = "../admin/";
-        else window.location.href = "../app/dashboard/";
+      function safeAtob(s){ try{ return atob(s) }catch{ return null } }
+      function parseJwtPayload(tok){
+        if (!tok || tok.split('.').length < 2) return null;
+        const json = safeAtob(tok.split('.')[1]);
+        if (!json) return null;
+        try { return JSON.parse(json); } catch { return null; }
+      }
+
+      const tok = localStorage.getItem('sg_token');
+      if (!tok) return; // no token -> stay here
+
+      const payload = parseJwtPayload(tok);
+      const now = Math.floor(Date.now()/1000);
+      const expired = payload && typeof payload.exp==='number' && payload.exp <= now;
+
+      if (!payload || expired) {
+        // invalid/expired: clear and stay (prevents ping-pong loop)
+        localStorage.removeItem('sg_token');
+        localStorage.removeItem('sg_role');
         return;
       }
+
+      const role = (localStorage.getItem('sg_role') || '').toLowerCase();
+      if (role === 'admin') window.location.replace("../admin/");
+      else window.location.replace("../app/dashboard/");
     })();
 
     (function () {
@@ -187,7 +203,6 @@
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(body)
-          // CHANGED: removed credentials:'include' (JWT flow)
         });
         let data = null;
         try { data = await res.json(); } catch { /* ignore non-JSON */ }
@@ -220,9 +235,10 @@
             });
 
             if (data.token) localStorage.setItem('sg_token', data.token);
-            if (data.role)  localStorage.setItem('sg_role',  data.role);
+            // default role to 'user' if backend omits it
+            localStorage.setItem('sg_role', (data.role || 'user'));
 
-            const role = (data.role || '').toLowerCase();
+            const role = (data.role || 'user').toLowerCase();
             if (role === 'admin') window.location.href = "../admin/";
             else window.location.href = "../app/dashboard/";
             return;
@@ -239,7 +255,7 @@
 
           const data = await apiPost('/register', payload);
           if (data.token) localStorage.setItem('sg_token', data.token);
-          if (data.role)  localStorage.setItem('sg_role',  data.role);
+          localStorage.setItem('sg_role', (data.role || 'user'));
 
           window.location.href = "../app/dashboard/";
         } catch (e2) {
