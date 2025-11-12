@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shadowgate Bank — Loans</title>
   <style>
-    :root{ --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af; --line:#262b33; --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; }
+    :root{
+      --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af; --line:#262b33;
+      --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; --chip:#0f1318; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+    }
     *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
     body{background:var(--bg);color:var(--text)} a{text-decoration:none;color:inherit}
 
@@ -23,12 +26,33 @@
     .wrap{max-width:900px;margin:0 auto;width:100%;padding:20px;display:grid;gap:20px}
     .card{background:linear-gradient(180deg,var(--panel),#11151a);border:1px solid var(--line);border-radius:16px;padding:20px}
     h2{margin:0 0 12px 0;font-weight:800}
+
     .grid{display:grid;gap:14px}
     .row{display:grid;grid-template-columns:220px 1fr;align-items:center;gap:10px}
+    @media (max-width:700px){ .row{grid-template-columns:1fr} }
+
     .input,.select{background:#0f1318;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-size:14px;width:100%}
     .input[readonly]{opacity:.9}
     .hidden{display:none}
     .muted{color:var(--muted);font-size:13px}
+    .mono{font-variant-numeric:tabular-nums}
+    .hr{height:1px;background:linear-gradient(90deg,transparent,#2a2f39,transparent);margin:6px 0} /* <- the literal line */
+
+    /* eligibility list */
+    .elist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:700px){ .elist{grid-template-columns:1fr} }
+    .ecard{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .etag{font-size:12px;border:1px solid var(--line);padding:3px 8px;border-radius:999px;background:#0e1217}
+    .emain{display:flex;flex-direction:column;gap:4px}
+    .ebig{font-weight:800}
+    .eok{color:var(--ok)} .ebad{color:var(--bad)}
+    .echoose{border:1px solid var(--line);background:#111419;color:var(--text);padding:6px 10px;border-radius:8px;cursor:pointer}
+    .echoose:hover{background:#151a21}
+    .eselected{outline:2px solid #3b82f6}
+
+    /* mini calc card */
+    .calcgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:700px){ .calcgrid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -49,6 +73,7 @@
     </div>
 
     <div class="wrap">
+      <!-- Loan application -->
       <section class="card">
         <h2>Loan Application</h2>
         <div class="grid">
@@ -71,36 +96,67 @@
           </div>
           <div class="row">
             <div>Amount:</div>
-            <input id="loanAmount" class="input" placeholder="$ 0.00" />
+            <input id="loanAmount" class="input mono" placeholder="$ 0" />
           </div>
+
+          <!-- show either duration (interest-only) OR repayment rate (stable) -->
           <div id="rowDuration" class="row">
             <div>Duration:</div>
-            <input id="loanDuration" class="input" placeholder="0" />
-            <span>wks</span>
+            <input id="loanDuration" class="input mono" placeholder="0" />
+            <span class="muted">weeks</span>
           </div>
+
           <div id="rowRepay" class="row hidden">
             <div>Repayment rate:</div>
-            <input id="loanRepayRate" class="input" placeholder="% 0.00" />
+            <input id="loanRepayRate" class="input mono" placeholder="0.10" />
+            <span class="muted">decimal (not %)</span>
           </div>
+
+          <!-- literal line separating user input vs auto populated -->
+          <div class="hr"></div>
+
           <div class="row">
             <div>Interest rate:</div>
-            <input id="loanRate" class="input" placeholder="% 0.00" readonly />
+            <input id="loanRate" class="input mono" placeholder="% 0.00" readonly />
           </div>
           <div class="row">
             <div>Total interest paid:</div>
-            <input id="totalInterest" class="input" placeholder="$ 0.00" readonly />
+            <input id="totalInterest" class="input mono" placeholder="$ 0" readonly />
           </div>
+          <div class="muted">Interest is charged weekly; totals are estimates.</div>
         </div>
       </section>
 
-      <section class="card">
-        <h2>Eligibility</h2>
-        <div class="grid">
+      <!-- Mini calculator for stable loans -->
+      <section id="calcCard" class="card hidden">
+        <h2>Repayment Rate Calculator</h2>
+        <div class="calcgrid">
           <div class="row">
-            <div>Max loan amount:</div>
-            <input id="maxLoan" class="input" placeholder="$ 0.00" readonly />
+            <div>Weeks:</div>
+            <input id="calcWeeks" type="number" min="1" step="1" class="input mono" placeholder="e.g. 10" />
           </div>
-          <div class="muted">Eligibility and rate data will populate from spreadsheet integration.</div>
+          <div class="row">
+            <div>Repayment rate (1 / weeks):</div>
+            <input id="calcRate" class="input mono" placeholder="0.10" readonly />
+          </div>
+        </div>
+        <div class="muted" style="margin-top:6px">
+          Tip: if you want the loan paid off in <em>N</em> weeks with a steady schedule, set repayment rate = <code>1 / N</code>.
+        </div>
+      </section>
+
+      <!-- Eligibility list -->
+      <section class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <h2>Eligibility</h2>
+          <span id="basesPill" class="etag">Bases: —</span>
+        </div>
+
+        <div id="eligErr" class="muted" style="color:var(--bad);display:none"></div>
+        <div id="eligList" class="elist"></div>
+
+        <div class="muted" style="margin-top:8px">
+          Click a tier to auto-fill the interest rate and clamp the maximum amount.
         </div>
       </section>
     </div>
@@ -108,51 +164,183 @@
 
   <script>
     (function(){
-      const typeSel = document.getElementById('loanType');
-      const rowDuration = document.getElementById('rowDuration');
-      const rowRepay = document.getElementById('rowRepay');
+      // ---- config & helpers ----
+      const API_BASE = "https://shadowgatebackend-production.up.railway.app/api";
+      const token = localStorage.getItem('sg_token');
+      if (!token) { window.location.href='../../login/index.html'; return; }
 
+      const $ = id => document.getElementById(id);
+      const typeSel = $('loanType');
+      const rowDuration = $('rowDuration');
+      const rowRepay = $('rowRepay');
+      const rateInput = $('loanRate');
+      const amtInput = $('loanAmount');
+      const repayInput = $('loanRepayRate');
+      const durInput = $('loanDuration');
+      const totalInput = $('totalInterest');
+
+      const calcCard = $('calcCard');
+      const calcWeeks = $('calcWeeks');
+      const calcRate = $('calcRate');
+
+      const eligList = $('eligList');
+      const eligErr = $('eligErr');
+      const basesPill = $('basesPill');
+
+      const fmtMoney0 = n => new Intl.NumberFormat(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+      const fmtPct = n => `${(+n).toFixed(2)}`;
+
+      let selectedTier = null;      // currently selected eligibility card
+      let tiers = [];               // fetched tiers
+
+      // ---- UI switching for type ----
       function applyTypeUI(){
         const t = (typeSel.value||'').toLowerCase();
         const isStable = t === 'stable';
         rowDuration.classList.toggle('hidden', isStable);
         rowRepay.classList.toggle('hidden', !isStable);
+        calcCard.classList.toggle('hidden', !isStable);
+      }
+      typeSel.addEventListener('change', applyTypeUI);
+
+      // ---- mini calculator ----
+      function syncCalc(){
+        const w = Math.max(1, Math.floor(+calcWeeks.value || 0));
+        if (!w) { calcRate.value = ''; return; }
+        const r = 1 / w;
+        calcRate.value = r.toFixed(4);
+        repayInput.value = r.toFixed(4);
+      }
+      calcWeeks.addEventListener('input', syncCalc);
+
+      // ---- eligibility rendering ----
+      function renderEligibility(rows){
+        eligList.innerHTML = '';
+        rows.forEach((r, idx) => {
+          const card = document.createElement('div');
+          card.className = 'ecard';
+          card.dataset.index = idx;
+
+          const main = document.createElement('div');
+          main.className = 'emain';
+          const tline = document.createElement('div');
+          tline.innerHTML = `<span class="etag">${(r.type||'').toUpperCase()}</span>`;
+          const max = document.createElement('div');
+          max.className = 'ebig mono';
+          max.textContent = fmtMoney0(r.max_amount);
+          const rate = document.createElement('div');
+          rate.className = 'muted mono';
+          rate.textContent = `Interest: ${fmtPct(r.interest)} %/wk`;
+          main.appendChild(tline);
+          main.appendChild(max);
+          main.appendChild(rate);
+
+          const choose = document.createElement('button');
+          choose.className = 'echoose';
+          choose.textContent = 'Select';
+          choose.addEventListener('click', () => selectTier(idx, card));
+
+          card.appendChild(main);
+          card.appendChild(choose);
+          eligList.appendChild(card);
+        });
       }
 
-      typeSel.addEventListener('change', applyTypeUI);
-      applyTypeUI();
+      function selectTier(idx, cardNode){
+        selectedTier = tiers[idx];
+        // visual selection
+        [...eligList.children].forEach(n => n.classList.remove('eselected'));
+        cardNode.classList.add('eselected');
 
+        // auto-populate interest rate, clamp amount
+        rateInput.value = fmtPct(selectedTier.interest);
+        const max = +selectedTier.max_amount || 0;
+        amtInput.max = max || '';
+        // if current amount exceeds cap, trim it
+        const cur = +amtInput.value || 0;
+        if (max && cur > max) amtInput.value = String(max);
+
+        // recalc total
+        recalcTotals();
+      }
+
+      // ---- totals preview (simple estimate) ----
+      function recalcTotals(){
+        if (!selectedTier) { totalInput.value = ''; return; }
+        const rate = (+selectedTier.interest || 0) / 100.0;   // weekly decimal
+        const amount = Math.max(0, +amtInput.value || 0);
+        const type = (typeSel.value||'').toLowerCase();
+        const r = Math.min(1, Math.max(0, +repayInput.value || 0.0));
+        const weeks = Math.max(1, Math.floor(+durInput.value || 1));
+
+        let interest = 0;
+        if (type === 'stable') {
+          let P = amount;
+          for (let w=0; w<weeks; w++){
+            interest += P * rate;
+            P = P * (1 - r);
+          }
+        } else {
+          interest = amount * rate * weeks;
+        }
+        totalInput.value = fmtMoney0(Math.round(interest));
+      }
+
+      amtInput.addEventListener('input', recalcTotals);
+      repayInput.addEventListener('input', recalcTotals);
+      durInput.addEventListener('input', recalcTotals);
+      typeSel.addEventListener('change', recalcTotals);
+
+      // ---- API helpers ----
+      async function api(path, opts={}){
+        const res = await fetch(API_BASE + path, {
+          ...opts,
+          headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + token,
+            ...(opts.headers||{})
+          }
+        });
+        let data=null; try{ data=await res.json(); }catch{}
+        if(!res.ok) throw new Error((data && (data.detail||data.error)) || `HTTP ${res.status}`);
+        return data;
+      }
+
+      async function loadEligibility(){
+        try{
+          const rows = await api("/loan/eligibility/mine");
+          tiers = rows || [];
+          if (!tiers.length){
+            eligErr.textContent = "No eligibility rows found for your account.";
+            eligErr.style.display = 'block';
+            return;
+          }
+          basesPill.textContent = `Bases: ${tiers[0].bases ?? '—'}`;
+          renderEligibility(tiers);
+
+          // auto-select the first row
+          const first = eligList.children[0];
+          if (first) selectTier(0, first);
+        }catch(err){
+          eligErr.textContent = err.message || "Failed to load eligibility.";
+          eligErr.style.display = 'block';
+        }
+      }
+
+      // ---- logout (JWT) ----
       document.getElementById('logout').addEventListener('click', ()=>{
-        localStorage.removeItem('sg_session');
+        localStorage.removeItem('sg_token');
+        localStorage.removeItem('sg_role');
         window.location.href='../../login/index.html';
       });
 
-      window.SGBLoans = {
-        getValues(){
-          return {
-            purpose: document.getElementById('loanPurpose').value,
-            type: typeSel.value,
-            amount: document.getElementById('loanAmount').value,
-            duration: document.getElementById('loanDuration').value,
-            repayRate: document.getElementById('loanRepayRate').value,
-            rate: document.getElementById('loanRate').value,
-            totalInterest: document.getElementById('totalInterest').value,
-            maxLoan: document.getElementById('maxLoan').value,
-          };
-        },
-        setValues(v={}){
-          if('purpose' in v) document.getElementById('loanPurpose').value = v.purpose;
-          if('type' in v) { typeSel.value = v.type; }
-          if('amount' in v) document.getElementById('loanAmount').value = v.amount;
-          if('duration' in v) document.getElementById('loanDuration').value = v.duration;
-          if('repayRate' in v) document.getElementById('loanRepayRate').value = v.repayRate;
-          if('rate' in v) document.getElementById('loanRate').value = v.rate;
-          if('totalInterest' in v) document.getElementById('totalInterest').value = v.totalInterest;
-          if('maxLoan' in v) document.getElementById('maxLoan').value = v.maxLoan;
-          applyTypeUI();
-        }
-      };
+      // boot
+      applyTypeUI();
+      loadEligibility();
     })();
   </script>
+<button class="btn btn-light" id="submitLoan">Submit Loan</button>
+<div class="muted" id="submitMsg"></div>
+
 </body>
 </html>
