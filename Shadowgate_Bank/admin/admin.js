@@ -1,14 +1,19 @@
-// Config
-const API_BASE = "/api"; // change to your API origin if hosted elsewhere
+// =======================
+// Shadowgate Admin (fixed)
+// =======================
 
-// Simple auth gate
+// Back-end API base (absolute URL so it works on GH Pages and benten.space)
+const API_BASE = "https://shadowgatebackend-production.up.railway.app/api";
+
+// ---- Simple auth gate (JWT, admin only) ----
 const token = localStorage.getItem("sg_token");
 const role = (localStorage.getItem("sg_role") || "").toLowerCase();
 if (!token || role !== "admin") {
-  window.location.href = "/login/index.html";
+  // from /admin/ -> /login/
+  window.location.href = "../login/";
 }
 
-// Elements
+// ---- Elements ----
 const bodyEl = document.getElementById("users-body");
 const emptyEl = document.getElementById("users-empty");
 const errEl = document.getElementById("err");
@@ -16,29 +21,37 @@ const refreshBtn = document.getElementById("refresh");
 const adminUser = document.getElementById("admin-user");
 const logoutBtn = document.getElementById("logout");
 
-adminUser.textContent = `Role: ${role}`;
+// Show role + (optional) remembered username
+const who = localStorage.getItem("sg_user");
+adminUser.textContent = `Role: ${role}${who ? " · " + who : ""}`;
 
-// Helpers
+// ---- Helper: authenticated fetch (no cookies) ----
 async function api(path, opts = {}) {
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
-    ...(opts.headers || {})
+    ...(opts.headers || {}),
   };
-  const res = await fetch(`${API_BASE}${path}`, { ...opts, headers, credentials: "include" });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...opts, headers });
+  } catch (e) {
+    throw new Error("Network error");
+  }
   let data = null;
-  try { data = await res.json(); } catch(_) {}
+  try { data = await res.json(); } catch (_) {}
   if (!res.ok) throw new Error((data && (data.detail || data.error)) || `HTTP ${res.status}`);
   return data;
 }
 
+// ---- Render helpers ----
 function rowHtml(u) {
   const created = u.created_at ? new Date(u.created_at).toLocaleString() : "";
   return `
     <tr data-id="${u.id}">
-      <td>${u.id}</td>
-      <td>${u.username}</td>
-      <td>${u.role}</td>
+      <td>${u.id ?? ""}</td>
+      <td>${u.username ?? ""}</td>
+      <td>${u.role ?? ""}</td>
       <td>${u.ingame_username || ""}</td>
       <td>${u.company_code || ""}</td>
       <td>${created}</td>
@@ -54,7 +67,7 @@ function rowHtml(u) {
 function renderUsers(list) {
   errEl.style.display = "none";
   bodyEl.innerHTML = "";
-  if (!list || list.length === 0) {
+  if (!Array.isArray(list) || list.length === 0) {
     emptyEl.style.display = "";
     return;
   }
@@ -62,32 +75,41 @@ function renderUsers(list) {
   bodyEl.innerHTML = list.map(rowHtml).join("");
 }
 
-// Actions → backend endpoints (adjust names to your API)
+// ---- API actions (same endpoints as before) ----
 async function loadUsers() {
-  const data = await api("/admin/users"); // GET -> [{...}]
-  renderUsers(data.users || data || []);
+  const data = await api("/admin/users"); // returns array or {users:[...]}
+  renderUsers(Array.isArray(data) ? data : (data.users || []));
 }
 
 async function promote(id) {
-  await api(`/admin/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role: "admin" }) });
+  await api(`/admin/users/${id}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role: "admin" }),
+  });
 }
+
 async function demote(id) {
-  await api(`/admin/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role: "user" }) });
+  await api(`/admin/users/${id}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role: "user" }),
+  });
 }
+
 async function resetPw(id) {
-  // backend returns { temp_password: "xxxx" } or 204
   const data = await api(`/admin/users/${id}/reset-password`, { method: "POST" });
   if (data && data.temp_password) {
     alert(`Temporary password: ${data.temp_password}`);
   }
 }
+
 async function delUser(id) {
   await api(`/admin/users/${id}`, { method: "DELETE" });
 }
 
-// Event wiring
+// ---- Events ----
 refreshBtn.addEventListener("click", async () => {
-  try { await loadUsers(); } catch(e){ errEl.textContent = e.message; errEl.style.display="block"; }
+  try { await loadUsers(); }
+  catch (e) { errEl.textContent = e.message; errEl.style.display = "block"; }
 });
 
 bodyEl.addEventListener("click", async (e) => {
@@ -111,11 +133,14 @@ bodyEl.addEventListener("click", async (e) => {
   }
 });
 
+// ---- Logout (relative redirect) ----
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("sg_token");
   localStorage.removeItem("sg_role");
-  window.location.href = "/login/index.html";
+  // keep sg_user for login autofill; remove if you prefer:
+  // localStorage.removeItem("sg_user");
+  window.location.href = "../login/";
 });
 
-// Initial load
-loadUsers().catch(e => { errEl.textContent = e.message; errEl.style.display="block"; });
+// ---- Initial load ----
+loadUsers().catch(e => { errEl.textContent = e.message; errEl.style.display = "block"; });
