@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadowgate Bank — Loans</title>
+  <style>
+    :root{ --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af; --line:#262b33; --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; }
+    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{background:var(--bg);color:var(--text)} a{text-decoration:none;color:inherit}
+
+    .page{min-height:100%;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);background:#0e1217}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{height:46px;width:auto;display:block;filter:grayscale(100%) brightness(.95)}
+    .title{font-weight:800;letter-spacing:-.3px}
+    .actions{display:flex;align-items:center;gap:10px}
+    .btn{border:1px solid var(--line);background:#111419;color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:all .15s ease}
+    .btn:hover{background:#151a21}
+    .btn-light{background:var(--btn);color:var(--ink);border:0}
+    .btn-light:hover{background:var(--btn-2);transform:translateY(-1px)}
+
+    .wrap{max-width:900px;margin:0 auto;width:100%;padding:20px;display:grid;gap:20px}
+    .card{background:linear-gradient(180deg,var(--panel),#11151a);border:1px solid var(--line);border-radius:16px;padding:20px}
+    h2{margin:0 0 12px 0;font-weight:800}
+    .grid{display:grid;gap:14px}
+    .row{display:grid;grid-template-columns:220px 1fr;align-items:center;gap:10px}
+    .input,.select{background:#0f1318;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-size:14px;width:100%}
+    .input[readonly]{opacity:.9}
+    .hidden{display:none}
+    .muted{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="brand" href="../../index.html" title="Home">
+        <img class="logo" src="../../assets/Shadowgate_Logo.png" alt="Shadowgate Bank" />
+        <div>
+          <div class="title">Shadowgate Bank</div>
+          <div class="muted">Loans Portal</div>
+        </div>
+      </a>
+      <div class="actions">
+        <a class="btn" href="../dashboard/index.html">Dashboard</a>
+        <a class="btn" href="../../index.html">Home</a>
+        <button id="logout" class="btn-light">Log out</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <section class="card">
+        <h2>Loan Application</h2>
+        <div class="grid">
+          <div class="row">
+            <div>Loan purpose:</div>
+            <select id="loanPurpose" class="select">
+              <option value="">Select purpose</option>
+              <option value="ship">Ship Purchase</option>
+              <option value="standard">Standard Reason</option>
+              <option value="refinance">Refinancing</option>
+            </select>
+          </div>
+          <div class="row">
+            <div>Loan type:</div>
+            <select id="loanType" class="select">
+              <option value="">Select type</option>
+              <option value="interest">Interest</option>
+              <option value="stable">Stable</option>
+            </select>
+          </div>
+          <div class="row">
+            <div>Amount:</div>
+            <input id="loanAmount" class="input" placeholder="$ 0.00" />
+          </div>
+          <div id="rowDuration" class="row">
+            <div>Duration:</div>
+            <input id="loanDuration" class="input" placeholder="0" />
+            <span>wks</span>
+          </div>
+          <div id="rowRepay" class="row hidden">
+            <div>Repayment rate:</div>
+            <input id="loanRepayRate" class="input" placeholder="% 0.00" />
+          </div>
+          <div class="row">
+            <div>Interest rate:</div>
+            <input id="loanRate" class="input" placeholder="% 0.00" readonly />
+          </div>
+          <div class="row">
+            <div>Total interest paid:</div>
+            <input id="totalInterest" class="input" placeholder="$ 0.00" readonly />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Eligibility</h2>
+        <div class="grid">
+          <div class="row">
+            <div>Max loan amount:</div>
+            <input id="maxLoan" class="input" placeholder="$ 0.00" readonly />
+          </div>
+          <div class="muted">Eligibility and rate data will populate from spreadsheet integration.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const typeSel = document.getElementById('loanType');
+      const rowDuration = document.getElementById('rowDuration');
+      const rowRepay = document.getElementById('rowRepay');
+
+      function applyTypeUI(){
+        const t = (typeSel.value||'').toLowerCase();
+        const isStable = t === 'stable';
+        rowDuration.classList.toggle('hidden', isStable);
+        rowRepay.classList.toggle('hidden', !isStable);
+      }
+
+      typeSel.addEventListener('change', applyTypeUI);
+      applyTypeUI();
+
+      document.getElementById('logout').addEventListener('click', ()=>{
+        localStorage.removeItem('sg_session');
+        window.location.href='../../login/index.html';
+      });
+
+      window.SGBLoans = {
+        getValues(){
+          return {
+            purpose: document.getElementById('loanPurpose').value,
+            type: typeSel.value,
+            amount: document.getElementById('loanAmount').value,
+            duration: document.getElementById('loanDuration').value,
+            repayRate: document.getElementById('loanRepayRate').value,
+            rate: document.getElementById('loanRate').value,
+            totalInterest: document.getElementById('totalInterest').value,
+            maxLoan: document.getElementById('maxLoan').value,
+          };
+        },
+        setValues(v={}){
+          if('purpose' in v) document.getElementById('loanPurpose').value = v.purpose;
+          if('type' in v) { typeSel.value = v.type; }
+          if('amount' in v) document.getElementById('loanAmount').value = v.amount;
+          if('duration' in v) document.getElementById('loanDuration').value = v.duration;
+          if('repayRate' in v) document.getElementById('loanRepayRate').value = v.repayRate;
+          if('rate' in v) document.getElementById('loanRate').value = v.rate;
+          if('totalInterest' in v) document.getElementById('totalInterest').value = v.totalInterest;
+          if('maxLoan' in v) document.getElementById('maxLoan').value = v.maxLoan;
+          applyTypeUI();
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

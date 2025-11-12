@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About • Shadowgate Bank</title>
+
+  <style>
+    :root{
+      --bg:#1e1e1e; --panel:#2a2a2a; --border:#333;
+      --text:#e6e6e6; --muted:#aeb4bb; --brand:#36b0ff;
+      --radius:14px; --maxw:1000px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--text); font-family:'Poppins', system-ui, Arial, sans-serif}
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Header */
+    header{background:var(--panel); border-bottom:1px solid var(--border)}
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px}
+    .header-bar{display:flex; align-items:center; justify-content:center; position:relative; min-height:92px}
+    .logo-left{position:absolute; left:16px; display:flex; align-items:center}
+    .logo-left img{height:74px; width:auto; object-fit:contain}
+    .site-title{font-size:26px; font-weight:800; margin:0}
+    .header-actions{position:absolute; right:16px; display:flex; gap:10px}
+    .btn{display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border:1px solid var(--border); background:#222; color:var(--text); border-radius:10px; font-weight:600}
+    .btn.primary{border-color:var(--brand)}
+    .btn:hover{background:#242424}
+
+    /* Body */
+    main{padding:28px 0}
+    h2{font-size:22px; margin:18px 0 10px}
+    p{color:#d7dbe1; line-height:1.6}
+    .muted{color:var(--muted)}
+
+    .panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin:14px 0}
+    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
+    @media (max-width:900px){ .grid-2{grid-template-columns:1fr} }
+
+    ul{margin:8px 0 0 20px}
+    li{margin:6px 0}
+
+    .cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="wrap">
+      <div class="header-bar">
+        <div class="logo-left">
+          <a href="../"><img src="../assets/Shadowgate_Logo.png" alt="Shadowgate Bank"></a>
+        </div>
+        <h1 class="site-title">About Shadowgate Bank</h1>
+        <div class="header-actions">
+          <a class="btn" href="../tools/">Tools</a>
+          <a class="btn" href="../login/">Log In</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Who we are</h2>
+      <p>
+        <strong>Shadowgate Bank</strong> is the financial arm of FIOC in <em>Prosperous Universe</em>.
+        Our goal is to streamline access to <strong>credit, loans, and capital markets</strong> for
+        corporations and independent operators, while providing a transparent way to price risk and
+        plan production.
+      </p>
+      <p class="muted">
+        Everything you see here is a player-made system: pages, tools, and data pipelines that
+        connect game-world activity to finance-style workflows.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="../tools/">Explore Tools</a>
+        <a class="btn" href="../">Home</a>
+      </div>
+    </section>
+
+    <section class="panel grid-2">
+      <div>
+        <h2>What we offer</h2>
+        <ul>
+          <li><strong>Loans</strong> — long-term financing for expansion or new freighters.</li>
+          <li><strong>Credit</strong> — flexible short-term liquidity with adjustable repayment rate.</li>
+          <li><strong>Futures Exchange (SG1)</strong> — trade future delivery of inputs; focus production when contracted.</li>
+          <li><strong>Equity Listings (SG1)</strong> — raise funds by listing company shares with a purpose and plan.</li>
+        </ul>
+        <p class="muted">Supported currencies: CIS, AIC, NCC, ICA.</p>
+      </div>
+      <div>
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>Public tools</strong> (no login): loan calculator, market viewer, listings.</li>
+          <li><strong>Account area</strong> (login): dashboard, loans/credit management, trading.</li>
+          <li><strong>Instant Settlement of Transactions</strong>: All transactions are immediately reflected on the
+             account balance of both parties. Interest not applied on negative balances.</li>
+
+          <li><strong>Guarantee</strong>: Shadowgate Bank stands as counterparty for exchange trades.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Technology</h2>
+      <p>
+        Shadowgate runs on a small, efficient stack designed to be reliable and easy to audit:
+      </p>
+      <ul>
+        <li><strong>ShadowLink API</strong> — a thin API layer that aggregates and settles trades and transactions.</li>
+        <li><strong>Permanent Data Storage</strong> — transaction logs, orders, and settlements are stored in structured
+            sheets users can export at any time.</li>
+      </ul>
+
+    </section>
+
+    <section class="panel grid-2">
+      <div>
+        <h2>Design principles</h2>
+        <ul>
+          <li><strong>Price–time priority</strong> in matching.</li>
+          <li><strong>Append-only logs</strong> for orders, trades, and ledger events.</li>
+          <li><strong>Deterministic processing</strong> (single serialized write path).</li>
+          <li><strong>Transparency</strong> via public, view-only market pages.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Roadmap</h2>
+        <ul>
+          <li>Auth-gated account dashboard and statements.</li>
+          <li>Company listing forms and investor profiles.</li>
+          <li>Candlestick charts and advanced market filters.</li>
+          <li>CSV exports & weekly statements archive.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Contact & community</h2>
+      <p>
+        We coordinate primarily through Discord. To keep your finger on the pulse, join us on the BEU server. Are you
+		  ready to start trading? Want quick and easy access to liquidity? Create an account and join the ShadowNet,
+		  a financial ecosystem developed by players for players to be your economic co-pilot.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="../tools/">Try the Tools</a>
+        <a class="btn" href="../login/">Create an Account</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="muted" style="margin:0">
+        <strong>Disclaimer:</strong> Shadowgate Bank is a community project for the game
+        <em>Prosperous Universe</em>. It is not an official feature of the game’s developers.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

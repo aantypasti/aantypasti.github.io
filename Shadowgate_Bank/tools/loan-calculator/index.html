@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loan Calculator • Shadowgate Bank</title>
+
+  <style>
+    :root{
+      --bg:#1e1e1e; --panel:#2a2a2a; --border:#333;
+      --text:#e6e6e6; --muted:#b9c0c7; --brand:#36b0ff; --radius:14px; --maxw:1100px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--text); font-family: 'Poppins', system-ui, Arial, sans-serif}
+    a{color:var(--brand); text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px}
+
+    /* Header (reuse pattern) */
+    header{background:var(--panel); border-bottom:1px solid var(--border)}
+    .header-bar{display:flex; align-items:center; justify-content:center; position:relative; min-height:92px}
+    .logo-left{position:absolute; left:16px; display:flex; align-items:center}
+    .logo-left img{height:74px; width:auto; object-fit:contain}
+    .site-title{font-size:26px; font-weight:800; margin:0}
+    .header-actions{position:absolute; right:16px; display:flex; gap:10px}
+    .btn{display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border:1px solid var(--border); background:#222; color:var(--text); border-radius:10px; font-weight:600}
+    .btn.primary{border-color:var(--brand)}
+    .btn:hover{background:#242424}
+
+    main{padding:24px 0}
+    h2{margin:8px 0 6px; font-size:24px; text-align:center}
+    p.muted{color:var(--muted); text-align:center; margin:0 0 20px}
+
+    .panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
+    .grid{display:grid; grid-template-columns: 1.1fr 0.9fr; gap:16px}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    .toggle{display:flex; gap:8px; flex-wrap:wrap}
+    .toggle .chip{
+      padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:#222; cursor:pointer; user-select:none
+    }
+    .toggle .chip.active{border-color:var(--brand); outline:1px solid var(--brand)}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    label{display:block; font-size:14px; color:#cfd3d8; margin:6px 0 4px}
+    input, select{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:#1a1a1a; color:var(--text)}
+    .note{font-size:13px; color:#aeb4bb}
+
+    table{width:100%; border-collapse:collapse; margin-top:12px}
+    th, td{padding:10px; border-bottom:1px solid var(--border); text-align:right}
+    th:first-child, td:first-child{text-align:left}
+    tfoot td{font-weight:700}
+    .apply{display:flex; justify-content:flex-end; margin-top:16px}
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="wrap">
+      <div class="header-bar">
+        <div class="logo-left">
+          <a href="../../"><img src="../../assets/Shadowgate_Logo.png" alt="Shadowgate Bank"></a>
+        </div>
+        <h1 class="site-title">Loan Calculator</h1>
+        <div class="header-actions">
+          <a class="btn" href="../">Tools</a>
+          <a class="btn" href="../../about/">About</a>
+          <a class="btn" href="../../login/">Log In</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="muted">Public tool</p>
+
+    <section class="panel grid">
+      <!-- Left column: inputs -->
+      <div>
+        <div class="toggle" id="loanType">
+          <div class="chip active" data-type="interest">Interest</div>
+          <div class="chip" data-type="stable">Stable</div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="currency">Currency</label>
+            <select id="currency">
+              <option value="CIS">CIS</option>
+              <option value="AIC">AIC</option>
+              <option value="NCC">NCC</option>
+              <option value="ICA">ICA</option>
+            </select>
+          </div>
+          <div>
+            <label for="amount">Amount</label>
+            <input id="amount" type="number" inputmode="decimal" placeholder="e.g., 100000" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="rate">% Interest (weekly)</label>
+            <input id="rate" type="number" step="0.01" placeholder="e.g., 3.00" />
+          </div>
+          <div>
+            <label for="duration">Duration (weeks)</label>
+            <input id="duration" type="number" step="1" min="1" placeholder="e.g., 8" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="interval">Interval</label>
+            <select id="interval" disabled>
+              <option>Weekly</option>
+            </select>
+            <div class="note">Interval locked to weekly for now</div>
+          </div>
+          <div id="stableOnly" style="display:none">
+            <!-- Repayment rate (editable) -->
+<div id="repayBlock">
+  <label for="repayRate">Repayment rate </label>
+  <input id="repayRate" type="number" step="0.001" min="0" max="1" placeholder="e.g., 0.125" />
+  <div class="note">Example: 0.125 = 12.5% of principal each period. </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: results table placeholder -->
+      <div>
+        <div class="panel" style="background:#1f1f1f">
+          <strong>Schedule (preview)</strong>
+          <table>
+            <thead>
+              <tr>
+                <th>Week</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+              <!-- rows will go here when we add logic -->
+              <tr><td colspan="4" style="text-align:center;color:#8b939b">No calculation yet</td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td id="tPrincipal">—</td>
+                <td id="tInterest">—</td>
+                <td id="tTotal">—</td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="apply">
+            <a class="btn primary" href="../../login/">Apply</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Minimal interactivity: toggle loan type UI + show 1/N repayment rate for Stable
+    const typeChips = document.querySelectorAll('#loanType .chip');
+    const stableOnly = document.getElementById('stableOnly');
+    const durationEl = document.getElementById('duration');
+    const repayRateEl = document.getElementById('repayRate');
+
+    function setType(type){
+      typeChips.forEach(c => c.classList.toggle('active', c.dataset.type === type));
+      stableOnly.style.display = (type === 'stable') ? 'block' : 'none';
+      updateRepayRate();
+    }
+    function updateRepayRate(){
+      const N = parseInt(durationEl.value,10);
+      if (!Number.isFinite(N) || N <= 0){ repayRateEl.value = '—'; return; }
+      repayRateEl.value = (1/N).toFixed(3);
+    }
+
+    typeChips.forEach(c => c.addEventListener('click', () => setType(c.dataset.type)));
+    durationEl.addEventListener('input', updateRepayRate);
+    // default type = Interest
+  </script>
+</body>
+</html>

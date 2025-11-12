@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tools • Shadowgate Bank</title>
+
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --panel: #2a2a2a;
+      --border: #333;
+      --text: #e6e6e6;
+      --muted: #aeb4bb;
+      --brand: #36b0ff;
+      --radius: 14px;
+      --maxw: 1100px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Poppins', system-ui, Arial, sans-serif;
+    }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 16px; }
+
+    /* Header */
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 92px;
+    }
+    .logo-left {
+      position: absolute;
+      left: 16px;
+      display: flex;
+      align-items: center;
+    }
+    .logo-left img {
+      height: 74px;
+      width: auto;
+      object-fit: contain;
+    }
+    .site-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 0;
+    }
+    .header-actions {
+      position: absolute;
+      right: 16px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      background: #222;
+      color: var(--text);
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .btn.primary {
+      border-color: var(--brand);
+    }
+    .btn:hover {
+      background: #242424;
+    }
+
+    /* Main content */
+    main { padding: 30px 0; text-align: center; }
+    h2 { font-size: 24px; margin-bottom: 12px; }
+    p { color: var(--muted); margin-bottom: 28px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      justify-items: center;
+    }
+
+    .tool-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .tool-card:hover {
+      background: #2e2e2e;
+      transform: translateY(-3px);
+    }
+    .tool-card img {
+      width: 220px;
+      height: auto;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .tool-card h3 {
+      margin: 8px 0;
+      font-size: 20px;
+    }
+    .tool-card p {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="wrap">
+      <div class="header-bar">
+        <div class="logo-left">
+          <a href="../"><img src="../assets/Shadowgate_Logo.png" alt="Shadowgate Bank"></a>
+        </div>
+        <h1 class="site-title">Shadowgate Bank Tools</h1>
+        <div class="header-actions">
+          <a class="btn" href="../about/">About</a>
+          <a class="btn" href="../login/">Log In</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h2></h2>
+
+    <div class="grid">
+      <!-- Loan Calculator -->
+      <a class="tool-card" href="./loan-calculator/">
+        <img src="./Loan_Calculator.png" alt="Loan Calculator">
+        <h3>Loan Calculator</h3>
+        <p>Simulate loan repayments, interest accrual, and repayment schedules using Shadowgate Bank’s calculator.</p>
+      </a>
+
+      <!-- Market Viewer -->
+      <a class="tool-card" href="./market/">
+        <img src="./SGB_FuturesCX.png" alt="Market Viewer">
+        <h3>Market Viewer</h3>
+        <p>View commodity prices, stock tickers, and market trends with real-time chart updates.</p>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

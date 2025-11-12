@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadowgate Exchange</title>
+  <style>
+    :root{ --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af; --line:#262b33; --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; --good:#22c55e; --bad:#ef4444; }
+    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{background:var(--bg);color:var(--text)} a{text-decoration:none;color:inherit}
+
+    .page{min-height:100%;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);background:#0e1217}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{height:46px;width:auto;display:block;filter:grayscale(100%) brightness(.95)}
+    .title{font-weight:800;letter-spacing:-.3px}
+    .actions{display:flex;align-items:center;gap:10px}
+    .btn{border:1px solid var(--line);background:#111419;color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn:hover{background:#151a21}
+    .btn-light{background:var(--btn);color:var(--ink);border:0}
+    .btn-light:hover{background:var(--btn-2)}
+
+    /* Now: left sidebar (saved), center content, right sidebar (add ticker) */
+    .wrap{display:grid;grid-template-columns:260px 1fr 260px;gap:18px;padding:18px;max-width:1400px;margin:0 auto;width:100%}
+    @media (max-width: 1200px){ .wrap{grid-template-columns:220px 1fr} .rightbar{display:none} }
+
+    .card{background:linear-gradient(180deg,var(--panel),#11151a);border:1px solid var(--line);border-radius:16px;padding:16px}
+
+    .sidebar .section-title, .rightbar .section-title{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .saved{display:grid;gap:8px}
+    .ticker-item{display:flex;align-items:center;justify-content:space-between;background:#0f1318;border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .ticker-item:hover{background:#151a21}
+    .empty{color:var(--muted);font-size:12px;border:1px dashed var(--line);padding:10px;border-radius:10px;text-align:center}
+    .chg-up{color:var(--good)} .chg-dn{color:var(--bad)}
+
+    .panel-title{font-weight:800;margin-bottom:10px}
+    .grid{display:grid;gap:16px}
+    .two{grid-template-columns:1fr 1fr}
+    @media (max-width: 1100px){ .two{grid-template-columns:1fr} }
+
+    .row{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:10px}
+    .input,.select{background:#0f1318;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-size:14px}
+    .pill{background:#0f1318;border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:12px;color:#c8cdd5}
+
+    .chart{height:320px;background:#0f1318;border:1px solid var(--line);border-radius:12px;position:relative}
+    canvas{width:100%;height:100%}
+    .periods{display:flex;gap:6px;position:absolute;top:8px;left:8px}
+    .periods button{border:1px solid var(--line);background:#10151b;color:#cbd0d7;padding:4px 8px;border-radius:8px;cursor:pointer;font-size:12px}
+    .periods button.active{background:#d1d5db;color:#0b0d12}
+
+    .toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .toolbar .right{display:flex;gap:10px;align-items:center}
+
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    thead th{color:var(--muted);font-size:12px;text-align:left;padding:4px 8px}
+    tbody td{background:#0f1318;border:1px solid var(--line);padding:10px 12px}
+    tbody tr td:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
+    tbody tr td:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
+    .right{text-align:right}
+
+    #submitOrder{background:linear-gradient(90deg,#e5e7eb,#d1d5db);color:#111;border:none;padding:10px 16px;font-weight:700;border-radius:12px;cursor:pointer;transition:all .2s ease}
+    #submitOrder:hover{background:linear-gradient(90deg,#f3f4f6,#d1d5db);transform:translateY(-1px)}
+
+    /* Order tool column fix */
+    .market-split{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-top:12px;align-items:start}
+    .order{background:#0f1318;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .order .row{margin:8px 0}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+    /* Rightbar search list */
+    .search{display:flex;gap:8px;align-items:center}
+    #addSearch{width:100%}
+    .list{display:grid;gap:8px;margin-top:10px;max-height:360px;overflow:auto}
+    .list .item{display:flex;justify-content:space-between;align-items:center;background:#0f1318;border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .list .item:hover{background:#151a21}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="brand" href="../../index.html" title="Home">
+        <img class="logo" src="../../assets/Shadowgate_Logo.png" alt="Shadowgate Bank" />
+        <div>
+          <div class="title">Shadowgate Exchange</div>
+          <div class="muted" id="who">Private • <span id="user-tag">User</span></div>
+        </div>
+      </a>
+      <div class="actions">
+        <a class="btn" href="../dashboard/index.html">Dashboard</a>
+        <a class="btn" href="../credit/index.html">Credit</a>
+        <a class="btn" href="../../index.html">Home</a>
+        <button id="logout" class="btn-light">Log out</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <!-- Sidebar LEFT -->
+      <aside class="card sidebar">
+        <div class="section-title">Saved Tickers</div>
+        <div id="saved" class="saved"></div>
+        <div id="savedEmpty" class="empty" style="display:none">No saved tickers yet.</div>
+      </aside>
+
+      <!-- Main area (center) -->
+      <main class="grid">
+        <section class="card">
+          <div class="toolbar">
+            <div class="panel-title">Market</div>
+            <div class="right">
+              <span class="pill">Available credit: <span id="avail">$ 0.00</span></span>
+            </div>
+          </div>
+
+          <div class="market-split">
+            <div class="chart">
+              <div class="periods">
+                <button data-p="30" class="active">1d</button>
+                <button data-p="90">3d</button>
+                <button data-p="210">7d</button>
+                <button data-p="900">30d</button>
+                <button data-p="2700">90d</button>
+                <button data-p="5400">180d</button>
+              </div>
+              <canvas id="chart"></canvas>
+            </div>
+            <div class="order">
+              <div class="row"><div>Ticker:</div><input id="fldTicker" class="input" placeholder="—" readonly /></div>
+              <div class="row"><div>Shares:</div><input id="fldShares" class="input" placeholder="0" /></div>
+              <div class="row"><div>Price:</div><input id="fldPrice" class="input" placeholder="$ 0.00" /></div>
+              <div class="row"><div>Buy / Sell:</div>
+                <select id="fldSide" class="select"><option value="buy">Buy</option><option value="sell">Sell</option></select>
+              </div>
+              <div class="row"><div>Type:</div>
+                <select id="fldType" class="select"><option value="market">Market</option><option value="limit">Limit</option></select>
+              </div>
+              <div class="row" style="grid-template-columns:1fr"><button id="submitOrder">Submit Order</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card two">
+          <div class="grid">
+            <div class="section-head">
+              <div class="panel-title">Asset Filter</div>
+              <select id="filterSel" class="select" style="width:160px">
+                <option value="">(Active / All)</option>
+              </select>
+            </div>
+            <div class="chart"><canvas id="chartFilter"></canvas></div>
+          </div>
+          <div class="grid">
+            <div class="panel-title">P/L • Account Balance</div>
+            <div class="chart"><canvas id="chartPL"></canvas></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="panel-title">Assets</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th class="right">Shares</th>
+                <th class="right">Price</th>
+                <th class="right">Change (Period)</th>
+                <th class="right">Change (Total)</th>
+              </tr>
+            </thead>
+            <tbody id="assets"></tbody>
+          </table>
+        </section>
+      </main>
+
+      <!-- Sidebar RIGHT: Add Ticker -->
+      <aside class="card rightbar">
+        <div class="section-title">Add Ticker</div>
+        <div class="search">
+          <input id="addSearch" class="input" placeholder="Search…" />
+        </div>
+        <div id="addList" class="list"></div>
+        <div id="addEmpty" class="empty">Connect a data source to see tickers.</div>
+
+        <div class="section-title" style="margin-top:14px">Recent</div>
+        <div id="recentList" class="list"></div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // --- session guard ---
+      const sess = localStorage.getItem('sg_session');
+      if (!sess) { window.location.href = '../../login/index.html'; return; }
+      const user = JSON.parse(sess).u || localStorage.getItem('sg_user') || 'User';
+      document.getElementById('user-tag').textContent = user;
+
+      // --- state (no hardcoded tickers) ---
+      const KEY = 'sg_exchange_' + user;
+      const state = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+        availableCredit: 0,
+        saved: [],
+        recent: [],
+        holdings: {},
+        period: 30,
+        active: null,
+        filterTicker: null
+      };
+      let tickers = [];
+
+      // injection API for your spreadsheet importer
+      window.SGX = {
+        setTickers(list){ tickers = Array.isArray(list) ? list.map(s=>String(s).toUpperCase()) : []; renderPicker(); if(!state.active && tickers.length){ setActive(tickers[0]); } savedEmptyToggle(); },
+        setState(partial){ Object.assign(state, partial||{}); save(); bootstrap(); },
+        getState(){ return JSON.parse(JSON.stringify(state)); }
+      };
+
+      // --- elements ---
+      const availEl = document.getElementById('avail');
+      const savedEl = document.getElementById('saved');
+      const savedEmpty = document.getElementById('savedEmpty');
+      const chart = document.getElementById('chart');
+      const chartFilter = document.getElementById('chartFilter');
+      const chartPL = document.getElementById('chartPL');
+      const assetsT = document.getElementById('assets');
+      const fldTicker = document.getElementById('fldTicker');
+      const fldShares = document.getElementById('fldShares');
+      const fldPrice = document.getElementById('fldPrice');
+      const fldSide = document.getElementById('fldSide');
+      const fldType = document.getElementById('fldType');
+      const addList = document.getElementById('addList');
+      const addSearch = document.getElementById('addSearch');
+      const addEmpty = document.getElementById('addEmpty');
+      const recentList = document.getElementById('recentList');
+      const filterSel = document.getElementById('filterSel');
+
+      // --- helpers (visual mocks) ---
+      const fmt$ = n => '$ ' + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+      const clamp = (v,a,b)=> Math.max(a,Math.min(b,v));
+      function seedRand(seed){ let x = 0; for (let i=0;i<seed.length;i++){ x = (x*31 + seed.charCodeAt(i))>>>0;} return ()=> (x = (1103515245*x + 12345)>>>0) / 0xffffffff; }
+      function seriesFor(ticker, n){ const r = seedRand(ticker||'X'); let p = 50 + (r()*200); const arr=[]; for(let i=0;i<n;i++){ p = clamp(p*(1+(r()-0.5)*0.04),1,1000); arr.push(p);} return arr; }
+      function drawLine(canvas, data){
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = canvas.clientWidth; const h = canvas.height = canvas.clientHeight;
+        ctx.clearRect(0,0,w,h); if(!data.length) return;
+        const min = Math.min(...data), max = Math.max(...data); const pad=8;
+        ctx.beginPath(); data.forEach((v,i)=>{ const x = pad + (w-2*pad)*i/(data.length-1); const y = h-pad - (h-2*pad)*(v-min)/(max-min||1); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 2; ctx.stroke();
+      }
+
+      // Main chart with axes (right price scale + bottom time scale)
+      function drawChartWithAxes(canvas, data){
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = canvas.clientWidth; const h = canvas.height = canvas.clientHeight;
+        ctx.clearRect(0,0,w,h); if(!data.length) return;
+        const padL = 10, padR = 46, padB = 26, padT = 12; // extra room on right/bottom for labels
+        const innerW = w - padL - padR; const innerH = h - padT - padB;
+        const min = Math.min(...data), max = Math.max(...data);
+        // line
+        ctx.beginPath();
+        data.forEach((v,i)=>{
+          const x = padL + innerW*i/(data.length-1);
+          const y = padT + innerH*(1 - (v-min)/(max-min||1));
+          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        });
+        ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 2; ctx.stroke();
+
+        // right axis with price ticks
+        const yTicks = 5; ctx.strokeStyle = '#262b33'; ctx.fillStyle = '#cbd0d7'; ctx.font = '12px ui-sans-serif';
+        for(let k=0;k<=yTicks;k++){
+          const t = k/yTicks; const y = padT + innerH*(1-t); const val = min + (max-min)*t;
+          // grid line
+          ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+innerW, y); ctx.stroke();
+          // tick + label on right
+          ctx.beginPath(); ctx.moveTo(padL+innerW, y); ctx.lineTo(padL+innerW+4, y); ctx.stroke();
+          ctx.fillText('$ '+Number(val).toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits:2}), padL+innerW+6, y+4);
+        }
+
+        // bottom time axis labels (static scale by selected period)
+        const xTicks = 6; const now = new Date();
+        // Map our period -> total days
+        const p = Number(state.period);
+        let days = 1; if(p>=210&&p<900) days = 7; else if(p>=900&&p<2700) days = 30; else if(p>=2700&&p<5400) days = 90; else if(p>=5400) days = 180; else if(p>=90) days = 3; else days = 1;
+        ctx.fillStyle = '#cbd0d7';
+        for(let k=0;k<=xTicks;k++){
+          const t = k/xTicks; const x = padL + innerW*t; const tickDate = new Date(now.getTime() - (1-t)*days*24*60*60*1000);
+          const label = (days<=1)
+            ? tickDate.getHours().toString().padStart(2,'0')+':00'
+            : (tickDate.getMonth()+1)+'/'+tickDate.getDate();
+          ctx.textAlign = 'center'; ctx.fillText(label, x, padT+innerH+18);
+          // bottom tick
+          ctx.strokeStyle = '#262b33'; ctx.beginPath(); ctx.moveTo(x, padT+innerH); ctx.lineTo(x, padT+innerH+4); ctx.stroke();
+        }
+      }); ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 2; ctx.stroke(); }
+      function priceNow(t){ const s = seriesFor(t, 200); return s[s.length-1]; }
+
+      function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+      function savedEmptyToggle(){ savedEmpty.style.display = state.saved.length? 'none':'block'; }
+
+      function renderSaved(){ savedEl.innerHTML=''; state.saved.forEach(t=>{ const now = priceNow(t); const prev = seriesFor(t,5)[0]; const chg = (now-prev)/prev*100; const div = document.createElement('div'); div.className='ticker-item'; div.innerHTML = `<span>${t}</span><span class="${chg>=0?'chg-up':'chg-dn'}">${chg>=0?'+':''}${chg.toFixed(1)}%</span>`; div.addEventListener('click', ()=> setActive(t)); savedEl.appendChild(div); }); savedEmptyToggle(); }
+
+      function renderPicker(){
+        addList.innerHTML='';
+        const q = (addSearch.value||'').toUpperCase().trim();
+        const list = tickers.filter(t => !q || t.includes(q)).slice(0,50);
+        addEmpty.style.display = list.length? 'none':'block';
+        list.forEach(t=>{
+          const it = document.createElement('div');
+          it.className = 'item';
+          it.innerHTML = `<span>${t}</span><span class='pill'>Add</span>`;
+          it.addEventListener('click', ()=> addTicker(t));
+          addList.appendChild(it);
+        });
+      }
+
+      function renderRecent(){
+        recentList.innerHTML='';
+        (state.recent||[]).slice(0,20).forEach(t=>{
+          const it = document.createElement('div');
+          it.className='item';
+          it.textContent = t;
+          it.addEventListener('click', ()=> setActive(t));
+          recentList.appendChild(it);
+        });
+      }
+
+      function renderFilterSelect(){
+        if(!filterSel) return;
+        const keys = Object.keys(state.holdings);
+        filterSel.innerHTML = '<option value="">(Active / All)</option>' + keys.map(t=>`<option value="${t}">${t}</option>`).join('');
+        if(state.filterTicker && keys.includes(state.filterTicker)) filterSel.value = state.filterTicker; else filterSel.value = '';
+        filterSel.disabled = !keys.length;
+      }
+
+      function renderFilterChart(){
+        const t = state.filterTicker || state.active || Object.keys(state.holdings)[0] || 'X';
+        drawLine(chartFilter, seriesFor(t, 200));
+      }
+
+      function addTicker(t){
+        if(!t) return; setActive(t);
+        if(!state.saved.includes(t)) state.saved.push(t);
+        state.recent = [t, ...state.recent.filter(x=>x!==t)].slice(0,20);
+        save(); renderSaved(); renderRecent();
+      }
+
+      function renderTop(){ availEl.textContent = fmt$(state.availableCredit); }
+
+      function setActive(t){ state.active = t; fldTicker.value = t||'—'; const now = t? priceNow(t):0; fldPrice.value = fmt$(now); drawLine(chart, t? seriesFor(t, state.period):[]); save(); renderAssets(); }
+
+      function renderPeriods(){ document.querySelectorAll('.periods button').forEach(btn=>{ btn.classList.toggle('active', Number(btn.dataset.p)===state.period); btn.onclick = ()=>{ state.period = Number(btn.dataset.p); drawChartWithAxes(chart, seriesFor(state.active, state.period)); save(); }; }); }
+
+      function renderAssets(){ assetsT.innerHTML=''; Object.keys(state.holdings).forEach(t=>{ const hld = state.holdings[t]; const now = priceNow(t); const periodSer = seriesFor(t, state.period); const prev = periodSer[0]; const chgP = (now-prev)/prev*100; const totalP = (now - hld.avg)/hld.avg*100; const tr = document.createElement('tr'); tr.innerHTML = `<td>${t}</td><td class='right'>${(hld.shares||0).toLocaleString()}</td><td class='right'>${fmt$(now)}</td><td class='right ${chgP>=0?'chg-up':'chg-dn'}'>${chgP>=0?'+':''}${isFinite(chgP)?chgP.toFixed(2):'—'}%</td><td class='right ${totalP>=0?'chg-up':'chg-dn'}'>${totalP>=0?'+':''}${isFinite(totalP)?totalP.toFixed(2):'—'}%</td>`; assetsT.appendChild(tr); });
+        /* chartFilter drawn via renderFilterChart() */
+        drawLine(chartPL, seriesFor('BAL'+(state.active||'X'), 200));
+      }
+
+      function submitOrder(){ const t = state.active; if(!t){ return alert('Pick a ticker first.'); }
+        const shares = parseFloat(fldShares.value); const price = parseFloat(String(fldPrice.value).replace(/[^0-9.\-]/g,'')) || priceNow(t); if(!isFinite(shares) || shares<=0) return alert('Enter valid share amount'); const side = fldSide.value; const type = fldType.value; const cost = shares*price; if(side==='buy'){ if(cost>state.availableCredit) return alert('Insufficient credit'); state.availableCredit -= cost; const h = state.holdings[t]||{shares:0,avg:0}; const newTotal = h.shares + shares; h.avg = newTotal? (h.avg*h.shares + cost)/newTotal : price; h.shares = newTotal; state.holdings[t]=h; } else { const h = state.holdings[t]||{shares:0,avg:0}; if(shares>h.shares) return alert('Not enough shares'); h.shares -= shares; state.availableCredit += cost; if(h.shares<=0) delete state.holdings[t]; else state.holdings[t]=h; }
+        save(); renderTop(); renderAssets(); renderFilterSelect(); renderFilterChart(); fldShares.value=''; if(type==='limit') alert('Mock: limit order stored as market for demo.'); }
+
+      // events
+      addSearch.addEventListener('input', renderPicker);
+      document.getElementById('submitOrder').addEventListener('click', submitOrder);
+      if(filterSel){ filterSel.addEventListener('change', ()=>{ state.filterTicker = filterSel.value || null; save(); renderFilterChart(); }); }
+      document.getElementById('logout').addEventListener('click', ()=>{ localStorage.removeItem('sg_session'); window.location.href='../../login/index.html'; });
+
+      function bootstrap(){ renderPicker(); renderSaved(); renderTop(); if(state.active) setActive(state.active); renderPeriods(); renderAssets(); renderRecent(); renderFilterSelect(); renderFilterChart(); }
+
+      // init (no default tickers)
+      bootstrap();
+    })();
+  </script>
+</body>
+</html>

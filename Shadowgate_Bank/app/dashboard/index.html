@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadowgate Bank — Account Dashboard</title>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af;
+      --line:#262b33; --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; --error:#ef4444;
+      --chip:#0f1318;
+    }
+    *{box-sizing:border-box} html,body{height:100%;margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{background:var(--bg);color:var(--text)}
+    a{text-decoration:none;color:inherit}
+
+    .page{min-height:100%;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:14px 20px;border-bottom:1px solid var(--line);background:#0e1217}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{height:46px;width:auto;display:block;filter:grayscale(100%) brightness(.95)}
+    .title{font-weight:800;letter-spacing:-.3px}
+    .actions{display:flex;align-items:center;gap:10px}
+    .btn{border:1px solid var(--line);background:#111419;color:var(--text);
+      padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn:hover{background:#151a21}
+    .btn-light{background:var(--btn);color:var(--ink);border:0}
+    .btn-light:hover{background:var(--btn-2)}
+
+    .wrap{display:grid;grid-template-columns:260px 1fr;gap:18px;padding:18px;max-width:1200px;margin:0 auto;width:100%}
+    .card{background:linear-gradient(180deg,var(--panel),#11151a);border:1px solid var(--line);
+      border-radius:16px;padding:16px}
+
+    .sidebar .section-title{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .nav{display:grid;gap:10px}
+    .nav a{display:flex;align-items:center;justify-content:space-between;
+      background:#0f1318;border:1px solid var(--line);padding:10px 12px;border-radius:10px}
+    .nav a:hover{background:#151a21}
+    .pill{background:#0f1318;border:1px solid var(--line);border-radius:8px;padding:4px 8px;
+      font-size:12px;color:#c8cdd5}
+
+    .grid{display:grid;gap:16px}
+    .grid.cols{grid-template-columns:1fr 1fr}
+    @media (max-width: 900px){ .wrap{grid-template-columns:1fr} .grid.cols{grid-template-columns:1fr} }
+
+    .h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .h .label{font-weight:800}
+    .row{display:grid;grid-template-columns:220px 1fr;align-items:center;gap:10px;margin:6px 0}
+    .input{background:#0f1318;border:1px solid var(--line);color:var(--text);
+      border-radius:10px;padding:8px 10px}
+    .money{display:flex;gap:8px;align-items:center}
+    .cash{min-width:120px}
+    .muted{color:var(--muted);font-size:12px}
+    .kicker{font-size:12px;color:#cbd0d7;background:var(--chip);border:1px solid var(--line);
+      padding:3px 6px;border-radius:8px}
+
+    .footer{padding:12px 20px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+    .spacer{height:8px}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Top bar -->
+    <div class="topbar">
+      <a class="brand" href="../../index.html" title="Home">
+        <img class="logo" src="../../assets/Shadowgate_Logo.png" alt="Shadowgate Bank" />
+        <div>
+          <div class="title">Shadowgate Bank</div>
+          <div class="muted" id="who">Private • <span id="user-tag">User</span></div>
+        </div>
+      </a>
+      <div class="actions">
+        <button id="setApi" class="btn">Set API Key</button>
+        <a class="btn" href="../../index.html">Home</a>
+        <button id="logout" class="btn-light">Log out</button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="wrap">
+      <!-- Left: actions -->
+      <aside class="card sidebar">
+        <div class="section-title">Actions</div>
+        <nav class="nav">
+          <a href="../../tools/loan-calculator/index.html"><span>Loan application</span><span class="pill">Tool</span></a>
+          <a href="../credit/index.html"><span>Credit transaction</span><span class="pill">Form</span></a>
+          <a href="../exchange/index.html"><span>Shadowgate Exchange</span><span class="pill">Market</span></a>
+          <a href="../settings/index.html"><span>Settings</span><span class="pill">Profile</span></a>
+        </nav>
+      </aside>
+
+      <!-- Right: main panels -->
+      <main class="grid">
+        <!-- Loans -->
+        <section class="card">
+          <div class="h">
+            <div class="label">Loans</div>
+            <span class="kicker">Summary</span>
+          </div>
+          <div class="row">
+            <div>Principal:</div>
+            <input class="input cash" id="loan-principal" placeholder="$ 0.00" />
+          </div>
+          <div class="row">
+            <div>Interest left:</div>
+            <input class="input cash" id="loan-interest-left" placeholder="$ 0.00" />
+          </div>
+        </section>
+
+        <!-- Credit -->
+        <section class="card">
+          <div class="h">
+            <div class="label">Credit <span class="muted" id="acctNo">[AN: —]</span></div>
+            <span class="kicker">Account</span>
+          </div>
+          <div class="row">
+            <div>Account balance:</div>
+            <input class="input cash" id="credit-balance" placeholder="$ 0.00" />
+          </div>
+          <div class="row">
+            <div>Credit limit:</div>
+            <input class="input cash" id="credit-limit" placeholder="$ 0.00" />
+          </div>
+          <div class="row">
+            <div>Funds available:</div>
+            <input class="input cash" id="credit-available" placeholder="$ 0.00" />
+          </div>
+          <div class="row">
+            <div>Interest rate:</div>
+            <input class="input" id="credit-rate" placeholder="% 0.00" />
+          </div>
+          <div class="row">
+            <div>Expected interest payment:</div>
+            <input class="input cash" id="credit-expected" placeholder="$ 0.00" />
+          </div>
+          <div class="row">
+            <div>Period end:</div>
+            <input class="input" id="credit-period-end" placeholder="YYYY-MM-DD" />
+          </div>
+        </section>
+
+        <!-- Assets (full width) -->
+        <section class="card" style="grid-column:1/-1">
+          <div class="h">
+            <div class="label">Assets</div>
+            <span class="kicker">Holdings</span>
+          </div>
+
+          <div class="grid cols">
+            <div class="row">
+              <div>Company shares:</div>
+              <div class="money">
+                <input class="input cash" id="asset-shares-usd" placeholder="$ 0.00" />
+                <input class="input cash" id="asset-shares-qty" placeholder="× 0" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>Futures:</div>
+              <div class="money">
+                <input class="input cash" id="asset-fut-usd" placeholder="$ 0.00" />
+                <input class="input cash" id="asset-fut-qty" placeholder="× 0" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>Funds:</div>
+              <div class="money">
+                <input class="input cash" id="asset-fund-usd" placeholder="$ 0.00" />
+                <input class="input cash" id="asset-fund-qty" placeholder="× 0" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="footer">
+      Tip: this is a mock UI. Wire these inputs to your API when ready.
+    </div>
+  </div>
+
+  <script>
+    // -------- Guard: require a session (client-side mock) --------
+    (function() {
+      const sess = localStorage.getItem('sg_session');
+      if (!sess) {
+        window.location.href = "../../login/index.html";
+        return;
+      }
+      const who = JSON.parse(sess || "{}").u || localStorage.getItem('sg_user') || "User";
+      document.getElementById('user-tag').textContent = who;
+
+      // Mock account number from username hash (placeholder)
+      const acctNo = "#" + Math.abs(hashCode(who)).toString().slice(0,6);
+      document.getElementById('acctNo').textContent = `[AN: ${acctNo}]`;
+
+      // Set API key prompt (stores locally for now)
+      document.getElementById('setApi').addEventListener('click', () => {
+        const cur = localStorage.getItem('sg_api') || "";
+        const val = prompt("Enter your FIO API Key:", cur);
+        if (val != null) localStorage.setItem('sg_api', val.trim());
+      });
+
+      // Logout
+      document.getElementById('logout').addEventListener('click', () => {
+        localStorage.removeItem('sg_session');
+        window.location.href = "../../login/index.html";
+      });
+
+      // ---- helpers ----
+      function hashCode(s){
+        let h = 0; for (let i=0;i<s.length;i++){ h = (h<<5)-h + s.charCodeAt(i); h|=0; }
+        return h;
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadowgate Bank — Credit</title>
+  <style>
+    :root{ --bg:#0f1115; --panel:#14171d; --text:#e5e7eb; --muted:#9ca3af; --line:#262b33; --btn:#d1d5db; --btn-2:#f3f4f6; --ink:#0b0d12; --error:#ef4444; }
+    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{background:var(--bg);color:var(--text)} a{text-decoration:none;color:inherit}
+
+    .page{min-height:100%;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);background:#0e1217}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{height:46px;width:auto;display:block;filter:grayscale(100%) brightness(.95)}
+    .title{font-weight:800;letter-spacing:-.3px}
+    .actions{display:flex;align-items:center;gap:10px}
+    .btn{border:1px solid var(--line);background:#111419;color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:all .15s ease}
+    .btn:hover{background:#151a21}
+    .btn-light{background:var(--btn);color:var(--ink);border:0}
+    .btn-light:hover{background:var(--btn-2);transform:translateY(-1px)}
+
+    .wrap{max-width:1100px;margin:0 auto;width:100%;padding:18px;display:grid;gap:18px;grid-template-columns:1fr}
+    .card{background:linear-gradient(180deg,var(--panel),#11151a);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative}
+
+    .next-charge{position:absolute;top:16px;right:20px;font-size:13px;color:var(--muted)}
+
+    .h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .label{font-weight:800}
+    .grid{display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:220px 1fr;align-items:center;gap:10px}
+    .row .hint{color:var(--muted);font-size:12px;text-align:right}
+
+    .input, .select{background:#0f1318;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-size:14px}
+    .input[readonly]{opacity:.9}
+
+    .section-title{font-size:12px;color:var(--muted);margin:4px 0 8px}
+    .split{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+    @media (max-width: 900px){ .row{grid-template-columns:180px 1fr} .split{grid-template-columns:1fr} }
+
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    thead th{color:var(--muted);font-size:12px;text-align:left;padding:4px 8px}
+    tbody td{background:#0f1318;border:1px solid var(--line);padding:10px 12px}
+    tbody tr td:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
+    tbody tr td:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
+    .right{text-align:right}
+    .err{color:var(--error);font-size:12px;display:none;margin-top:8px}
+    .err.show{display:block}
+
+    #submitTx{
+      background:linear-gradient(90deg,#e5e7eb,#d1d5db);
+      color:#111;
+      border:none;
+      padding:10px 16px;
+      font-weight:700;
+      border-radius:12px;
+      cursor:pointer;
+      transition:all .2s ease;
+    }
+    #submitTx:hover{
+      background:linear-gradient(90deg,#f3f4f6,#d1d5db);
+      transform:translateY(-1px);
+    }
+    #submitTx:active{
+      transform:translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="brand" href="../../index.html" title="Home">
+        <img class="logo" src="../../assets/Shadowgate_Logo.png" alt="Shadowgate Bank" />
+        <div>
+          <div class="title">Shadowgate Bank</div>
+          <div class="muted" id="who">Credit • <span id="user-tag">User</span></div>
+        </div>
+      </a>
+      <div class="actions">
+        <a class="btn" href="../dashboard/index.html">Dashboard</a>
+        <a class="btn" href="../../index.html">Home</a>
+        <button id="logout" class="btn-light">Log out</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <!-- Credit Summary -->
+      <section class="card">
+        <div class="next-charge">Next charge: <span id="nextCharge">—</span></div>
+        <div class="h"><div class="label">Credit</div></div>
+        <div class="grid">
+          <div class="row">
+            <div>Account Balance:</div>
+            <input id="bal" class="input" placeholder="$ 0.00" readonly />
+          </div>
+          <div class="row">
+            <div>Available Credit:</div>
+            <input id="avail" class="input" placeholder="$ 0.00" readonly />
+          </div>
+          <div class="row">
+            <div>Interest Rate:</div>
+            <input id="rate" class="input" placeholder="% 0.00" readonly />
+          </div>
+        </div>
+      </section>
+
+      <!-- Make a Transaction -->
+      <section class="card">
+        <div class="h"><div class="label">Make a Transaction</div></div>
+        <div class="split">
+          <div class="grid">
+            <div class="row" style="grid-template-columns:220px 1fr">
+              <div>Type:</div>
+              <select id="txType" class="select">
+                <option value="payment">Payment</option>
+                <option value="withdrawal">Withdrawal</option>
+              </select>
+            </div>
+            <div class="row" style="grid-template-columns:220px 1fr">
+              <div>Amount:</div>
+              <input id="txAmt" class="input" placeholder="$ 0.00" />
+            </div>
+            <div>
+              <button id="submitTx">Submit</button>
+              <span id="err" class="err">Enter a valid amount.</span>
+            </div>
+          </div>
+          <div class="grid" style="align-content:start">
+            <div class="muted">• Payment decreases balance and increases available credit.</div>
+            <div class="muted">• Withdrawal increases balance and reduces available credit (no overdraft allowed).</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transaction History -->
+      <section class="card">
+        <div class="h"><div class="label">Transaction History</div></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Transaction Type</th>
+              <th class="right">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const sess = localStorage.getItem('sg_session');
+      if (!sess) { window.location.href = '../../login/index.html'; return; }
+      const user = JSON.parse(sess).u || localStorage.getItem('sg_user') || 'User';
+      document.getElementById('user-tag').textContent = user;
+
+      const balEl = document.getElementById('bal');
+      const availEl = document.getElementById('avail');
+      const rateEl = document.getElementById('rate');
+      const nextEl = document.getElementById('nextCharge');
+      const tbody = document.getElementById('tbody');
+      const typeEl = document.getElementById('txType');
+      const amtEl = document.getElementById('txAmt');
+      const errEl = document.getElementById('err');
+
+      const KEY = 'sg_credit_' + user;
+      const today = new Date();
+
+      // Calculate next Friday
+      const day = today.getDay(); // Sunday=0, Monday=1,...Friday=5
+      const diff = (5 - day + 7) % 7 || 7; // Days until next Friday
+      const nextFriday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
+
+      const defaultState = { balance: 0, limit: 0, available: 0.00, rate: 5.00, nextCharge: nextFriday.toISOString(), history: [] };
+      let state = JSON.parse(localStorage.getItem(KEY) || 'null') || defaultState;
+
+      const fmt$ = (n)=> '$ ' + (Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}));
+      const fmtTs = (ts)=> new Date(ts).toLocaleString();
+
+      function render(){
+        balEl.value = fmt$(state.balance);
+        availEl.value = fmt$(state.available);
+        rateEl.value = '% ' + state.rate.toFixed(2);
+        nextEl.textContent = new Date(state.nextCharge).toLocaleDateString();
+        tbody.innerHTML = '';
+        state.history.slice().reverse().forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${fmtTs(r.ts)}</td><td>${r.type}</td><td class='right'>${fmt$(r.amount)}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+      document.getElementById('submitTx').addEventListener('click', () => {
+        errEl.classList.remove('show');
+        const amt = parseFloat(String(amtEl.value).replace(/[^0-9.\-]/g,''));
+        if (!isFinite(amt) || amt <= 0) { errEl.textContent = 'Enter a valid amount.'; errEl.classList.add('show'); return; }
+        const t = typeEl.value;
+        if (t === 'payment') {
+          const pay = Math.min(amt, state.balance);
+          state.balance -= pay;
+          state.available = Math.min(state.limit, state.available + pay);
+          state.history.push({ ts: Date.now(), type: 'Payment', amount: pay });
+        } else {
+          if (amt > state.available) { errEl.textContent = 'Insufficient available credit.'; errEl.classList.add('show'); return; }
+          state.balance += amt;
+          state.available -= amt;
+          state.history.push({ ts: Date.now(), type: 'Withdrawal', amount: amt });
+        }
+        amtEl.value = '';
+        save();
+        render();
+      });
+
+      document.getElementById('logout').addEventListener('click', () => {
+        localStorage.removeItem('sg_session');
+        window.location.href = '../../login/index.html';
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

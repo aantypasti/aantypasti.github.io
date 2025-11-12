@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadowgate Bank</title>
+
+  <!-- Temporary page styles (we can move to assets/style.css later) -->
+  <style>
+    :root{
+      --bg: #1e1e1e;         /* dark gray, not pitch black */
+      --panel: #2a2a2a;
+      --border: #333;
+      --muted: #b9c0c7;
+      --brand: #36b0ff;      /* accent (links/buttons) */
+      --text: #e6e6e6;
+      --radius: 14px;
+      --maxw: 1100px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text)}
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Header */
+    header{background:var(--panel); border-bottom:1px solid var(--border)}
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px}
+    .header-bar{display:flex; align-items:center; justify-content:center; position:relative; min-height:92px}
+    .logo-left{position:absolute; left:16px; display:flex; align-items:center; gap:10px}
+    .logo-left img{height:74px; width:auto; object-fit:contain}
+    .site-title{font-size:28px; font-weight:800; letter-spacing:.3px; margin:0}
+    .header-actions{position:absolute; right:16px; display:flex; gap:10px; align-items:center}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 14px; border:1px solid var(--border); background:#222; color:var(--text);
+      border-radius:10px; text-decoration:none; font-weight:600;
+    }
+    .btn.primary{border-color:var(--brand); }
+    .btn:hover{background:#242424}
+
+    /* Hero */
+    .hero{padding:28px 0 8px}
+    .hero h2{margin:8px 0 6px; text-align:center; font-size:26px; font-weight:800}
+    .hero .tagline{color:var(--muted); text-align:center; margin:4px 0 26px}
+
+    /* Intro copy block */
+    .intro{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+           padding:18px; line-height:1.5; color:#d9dde2}
+
+    /* Section rows (Loans / Credit / Exchange) */
+    .section{margin:22px 0; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
+    .row{display:grid; grid-template-columns: 1.2fr 1fr; gap:18px; padding:18px}
+    .row.alt{grid-template-columns: 1fr 1.2fr}
+    .row h3{margin:0 0 6px; font-size:22px}
+    .row p{margin:0; color:#cfd3d8}
+    figure{margin:0; display:flex; align-items:center; justify-content:center}
+    .card-img{
+      width:100%; max-width:520px; aspect-ratio:16/9; object-fit:cover;
+      border-radius:10px; border:1px solid var(--border);
+      display:block;
+    }
+    .actions{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap}
+
+    /* Footer */
+    footer{margin:26px 0 40px; text-align:center; color:var(--muted)}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .row, .row.alt{grid-template-columns:1fr; gap:14px}
+      .header-bar{min-height:84px}
+      .logo-left img{height:64px}
+      .site-title{font-size:24px}
+    }
+  </style>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .logo-left img {
+    height: 100px; /* previously 74px */
+    width: auto;
+    object-fit: contain;
+  }
+</style>
+
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="wrap">
+      <div class="header-bar">
+        <div class="logo-left">
+          <a href="./"><img src="./assets/Shadowgate_Logo.png" alt="Shadowgate Bank Logo"></a>
+        </div>
+        <h1 class="site-title">Shadowgate Bank</h1>
+
+        <div class="header-actions">
+          <a class="btn" href="./tools/">Tools</a>
+          <a class="btn" href="./about/">About</a>
+          <a class="btn primary" href="./login/">Login/Register</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero -->
+    <section class="hero">
+      <h2>Welcome, Citizen</h2>
+      <p class="tagline">An all-in-one financial ecosystem for Prosperous Universe.</p>
+    </section>
+
+    <!-- Intro copy (matches your sketch paragraphs) -->
+    <section class="intro">
+      <p><strong>Shadowgate Bank</strong> is the financial branch of FIOC. We are a fully integrated institution designed to streamline access to credit and investments.</p>
+      <p>In addition to offering standard financial services, Shadowgate Bank acts as a guarantor for all transactions made via <strong>ShadowLink</strong>, our in-house API designed to automate third-party transactions with no in-game protections.</p>
+    </section>
+
+    <!-- Loans: description (left) + image (right) -->
+    <section class="section">
+      <div class="row">
+        <div>
+          <h3>Loans</h3>
+          <p>Looking to expand or need a new freighter? SGB loans offer long-term financing for all of your plans.</p>
+          <div class="actions">
+            <a class="btn primary" href="./app/loans/">Go to Loans</a>
+            <a class="btn" href="./tools/loan-calculator/">Loan Calculator</a>
+          </div>
+        </div>
+        <figure>
+          <img class="card-img" src="./assets/SGB_TradLoans.png" alt="Traditional Loans">
+        </figure>
+      </div>
+    </section>
+
+    <!-- Credit: image (left) + description (right) -->
+    <section class="section">
+      <div class="row alt">
+        <figure>
+          <img class="card-img" src="./assets/SGB_Credit.png" alt="Credit Services">
+        </figure>
+        <div>
+          <h3>Credit</h3>
+          <p>For short-term liquidity or emergencies, SGB offers immediate access to funds with the most flexible repayment terms in the universe.</p>
+          <div class="actions">
+            <a class="btn primary" href="./app/credit/">Manage Credit</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Exchange: description (left) + image (right) -->
+    <section class="section">
+      <div class="row">
+        <div>
+          <h3>Futures Exchange</h3>
+          <p>Want to guarantee access to inputs one or two months ahead? List or trade futures and produce only when contracted.</p>
+          <p style="margin-top:6px">Raise capital by listing shares on <strong>SG1</strong>, add your company profile and plan for investment.</p>
+          <p style="margin-top:6px">All trades are guaranteed by Shadowgate Bank and settled every Friday at midnight.</p>
+          <div class="actions">
+            <a class="btn primary" href="./app/exchange/">Open Exchange</a>
+            <a class="btn" href="./tools/market/">View Market (read-only)</a>
+          </div>
+        </div>
+        <figure>
+          <img class="card-img" src="./assets/SGB_FuturesCX.png" alt="Futures Exchange">
+        </figure>
+      </div>
+    </section>
+
+    <!-- ShadowLink note -->
+    <section class="section" style="padding:0">
+      <div class="row" style="grid-template-columns:1fr; padding:16px">
+        <p style="margin:0; color:#cbd3da">
+          <strong>Powered by ShadowLink API</strong> — seamlessly integrates your financial transactions, assets, and liabilities into a single dashboard.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="y"></span> Shadowgate Bank
+  </footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
