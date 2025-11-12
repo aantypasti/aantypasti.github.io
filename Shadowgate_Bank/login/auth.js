@@ -5,9 +5,10 @@ const submitBtn = document.getElementById("submit-btn");
 const registerFields = document.getElementById("register-fields");
 const errorMessage = document.getElementById("error-message");
 // after saving authToken
+// Keep next as a variable; use it **after** we log in
 const params = new URLSearchParams(location.search);
-const next = params.get('next') || '../app/dashboard/index.html';
-location.href = next;
+const next = params.get('next'); // may be null; we'll fallback later
+
 
 
 
@@ -52,15 +53,15 @@ form.addEventListener("submit", async (e) => {
 
     const data = await res.json();
 
-    if (!res.ok) throw new Error(data.detail || "Request failed");
+    if (res.ok) {
+  localStorage.setItem("authToken", data.token);
 
-    // Store token & redirect
-    localStorage.setItem("token", data.token);
-    if (data.role === "admin") {
-      window.location.href = "/admin/index.html";
-    } else {
-      window.location.href = "/app/dashboard/index.html";
-    }
+  // handle redirect target
+  const params = new URLSearchParams(location.search);
+  const next = params.get("next") || "../app/dashboard/index.html";
+  window.location.href = next;
+}
+
 
   } catch (err) {
     errorMessage.textContent = err.message;
