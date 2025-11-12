@@ -58,11 +58,11 @@
     <div class="container">
       <!-- Header with clickable logo + Home -->
       <div class="header">
-        <a class="brand" href="../index.html" title="Back to Home">
-          <img class="logo-img" src="../assets/Shadowgate_Logo.png" alt="Shadowgate Bank Logo" />
+        <a class="brand" href="../../../Shadowgate_Exchange/public/Shadowgate_Bank/index.html" title="Back to Home">
+          <img class="logo-img" src="../../../Shadowgate_Exchange/public/Shadowgate_Bank/assets/Shadowgate_Logo.png" alt="Shadowgate Bank Logo" />
           <h1 class="title">Shadowgate Bank</h1>
         </a>
-        <a class="home" href="../index.html">Home</a>
+        <a class="home" href="../../../Shadowgate_Exchange/public/Shadowgate_Bank/index.html">Home</a>
       </div>
 
       <div class="card">
@@ -130,8 +130,8 @@
 			const session = localStorage.getItem('sg_token');
 if (session) {
   const role = (localStorage.getItem('sg_role') || '').toLowerCase();
-  if (role === 'admin') window.location.href = "../admin/index.html";
-  else window.location.href = "../app/dashboard/index.html";
+  if (role === 'admin') window.location.href = "../../../Shadowgate_Exchange/public/Shadowgate_Bank/admin/index.html";
+  else window.location.href = "../../../Shadowgate_Exchange/public/Shadowgate_Bank/app/dashboard/index.html";
 }
 
 			(function () {
@@ -242,9 +242,9 @@ if (session) {
 			// Redirect by role if provided
 			const role = (data.role || '').toLowerCase();
 			if (role === 'admin') {
-			window.location.href = "../admin/index.html";
+			window.location.href = "../../../Shadowgate_Exchange/public/Shadowgate_Bank/admin/index.html";
 		} else {
-			window.location.href = "../app/dashboard/index.html";
+			window.location.href = "../../../Shadowgate_Exchange/public/Shadowgate_Bank/app/dashboard/index.html";
 		}
 			return;
 		}
@@ -264,7 +264,7 @@ if (session) {
 			if (data.token) localStorage.setItem('sg_token', data.token);
 			if (data.role) localStorage.setItem('sg_role', data.role);
 
-			window.location.href = "../app/dashboard/index.html";
+			window.location.href = "../../../Shadowgate_Exchange/public/Shadowgate_Bank/app/dashboard/index.html";
 		} catch (e2) {
 			err.textContent = e2.message || 'Something went wrong.';
 			err.classList.add('show');
